@@ -113,8 +113,8 @@ over HTTPS on their ports: a client signs in with OAuth, and the MCP exchanges
 its token for one of the daemon, or of the collector, through a confidential
 client of the OpenID provider (`auth.yaml`, its secret in a sec). This is
 optional: each MCP then installs its exchange profile and its secret in its
-configuration directory, `fs#om3conf` or `fs#oc3conf`, and sets its HTTPS
-listener, with the certificate the directory holds. It is set up in
+configuration directory of `volume#ai`, `/om3conf/` or `/oc3conf/`, and sets
+its HTTPS listener, with the certificate the directory holds. It is set up in
 [om3-mcp authentication](https://github.com/opensvc/om3-mcp/blob/main/docs/authentication.md)
 and [oc3-mcp configuration](https://github.com/opensvc/oc3-mcp/blob/main/docs/configuration.md#token-exchange).
 

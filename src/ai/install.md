@@ -31,8 +31,9 @@ MCPs, over HTTPS.
 | oc3-mcp | `ghcr.io/opensvc/oc3-mcp` | `994:982` (opensvc-mcp) | 8444, for external clients only |
 
 The ids are set in the images: the nodes need no such user. The MCPs create
-their sockets in `/run/opensvc-ai/sock`, owned by `994:983` with mode `2750`,
-so the agent, of the group `983`, connects to them, and no other user enters.
+their sockets in the `sock/` directory of a memory volume of the service,
+owned by `994:983` with mode `2750`, so the agent, of the group `983`,
+connects to them, and no other user enters.
 
 ## Create the configurations
 
@@ -97,43 +98,27 @@ size = 1g
 shared = true
 install = /state/ mode 0700 user 995 group 983
 
-[fs#sock]
-type = directory
-path = /run/opensvc-ai/sock
-user = 994
-group = 983
-dirperm = 2750
-
-[fs#om3conf]
-type = directory
-path = /etc/opensvc-om3-mcp
+# The sockets of the MCPs, and the configuration of each component, in
+# memory: nothing on the disk of the nodes, discarded at stop.
+[volume#ai]
+name = {name}-ai
+volatile = true
+size = 16m
 user = root
 group = 982
-dirperm = 0750
 perm = 0640
-install = /server.crt from ./sec/ai-tls key certificate_chain mode 0640 user root group 982 required
-	/server.key from ./sec/ai-tls key private_key mode 0640 user root group 982 required
-	/clusters.yaml from ./cfg/om3-mcp mode 0640 user root group 982 required
-
-[fs#oc3conf]
-type = directory
-path = /etc/opensvc-oc3-mcp
-user = root
-group = 982
 dirperm = 0750
-perm = 0640
-install = /server.crt from ./sec/ai-tls key certificate_chain mode 0640 user root group 982 required
-	/server.key from ./sec/ai-tls key private_key mode 0640 user root group 982 required
-
-[fs#agentconf]
-type = directory
-path = /etc/opensvc-ai
-user = root
-group = 983
-dirperm = 0750
-perm = 0640
-install = /agent.crt from ./sec/ai-tls key certificate_chain mode 0640 user root group 983 required
-	/agent.key from ./sec/ai-tls key private_key mode 0640 user root group 983 required
+install = /sock/ mode 2750 user 994 group 983
+	/om3conf/
+	/om3conf/server.crt from ./sec/ai-tls key certificate_chain required
+	/om3conf/server.key from ./sec/ai-tls key private_key required
+	/om3conf/clusters.yaml from ./cfg/om3-mcp required
+	/oc3conf/
+	/oc3conf/server.crt from ./sec/ai-tls key certificate_chain required
+	/oc3conf/server.key from ./sec/ai-tls key private_key required
+	/agentconf/ group 983
+	/agentconf/agent.crt from ./sec/ai-tls key certificate_chain group 983 required
+	/agentconf/agent.key from ./sec/ai-tls key private_key group 983 required
 
 [container#om3mcp]
 type = docker
@@ -143,8 +128,8 @@ rm = true
 restart = 3
 user = 994:982
 volume_mounts = /etc/localtime:/etc/localtime:ro
-	/etc/opensvc-om3-mcp:/etc/opensvc-om3-mcp:ro
-	/run/opensvc-ai/sock:/run/opensvc-ai/sock:rw
+	volume#ai:/om3conf:/etc/opensvc-om3-mcp:ro
+	volume#ai:/sock:/run/opensvc-ai/sock:rw
 environment = OPENSVC_MCP_DELEGATED_SOCKET=/run/opensvc-ai/sock/om3-mcp.sock
 	OPENSVC_MCP_CLUSTER_CONFIG_FILE=/etc/opensvc-om3-mcp/clusters.yaml
 	OPENSVC_MCP_ACTIONS=enabled
@@ -157,8 +142,8 @@ rm = true
 restart = 3
 user = 994:982
 volume_mounts = /etc/localtime:/etc/localtime:ro
-	/etc/opensvc-oc3-mcp:/etc/opensvc-oc3-mcp:ro
-	/run/opensvc-ai/sock:/run/opensvc-ai/sock:rw
+	volume#ai:/oc3conf:/etc/opensvc-oc3-mcp:ro
+	volume#ai:/sock:/run/opensvc-ai/sock:rw
 environment = OPENSVC_MCP_DELEGATED_SOCKET=/run/opensvc-ai/sock/oc3-mcp.sock
 	OPENSVC_MCP_COLLECTOR_URL=https://collector.example.com/api
 	OPENSVC_MCP_DELEGATED_ISSUER=https://sso.example.com/application/o/oc3/
@@ -173,8 +158,8 @@ rm = true
 restart = 3
 user = 995:983
 volume_mounts = /etc/localtime:/etc/localtime:ro
-	/etc/opensvc-ai:/etc/opensvc-ai:ro
-	/run/opensvc-ai/sock:/run/opensvc-ai/sock:ro
+	volume#ai:/agentconf:/etc/opensvc-ai:ro
+	volume#ai:/sock:/run/opensvc-ai/sock:ro
 	volume#state:/state:/var/lib/opensvc-ai-agent:rw
 configs_environment = ai/OPENSVC_AI_*
 secrets_environment = ai/OPENSVC_AI_*
@@ -206,10 +191,12 @@ environment = OPENSVC_AI_LISTEN_ADDR=[::]:8090
   `OPENSVC_AI_OC3_MCP_SOCKET`: its values are explained in
   [Configure](configure.md#oc3-mcp). A site without collector leaves both
   out, and the agent then serves the webapps only.
-* `fs#om3conf` and `fs#oc3conf` hold the configuration of each MCP, readable
-  by the group of the MCPs only: the catalogue of om3-mcp, and the
-  certificate of the service address, which the MCPs present to
-  [external MCP clients](configure.md#external-mcp-clients).
+* `volume#ai` holds, in memory, the sockets of the MCPs and the configuration
+  of each component, each mounted where it reads it: the catalogue of
+  om3-mcp, and the certificate of the service, which the agent presents to
+  its clients and the MCPs to [external MCP clients](configure.md#external-mcp-clients).
+  The group of the MCPs reads their configuration, the group of the agent its
+  own, and the sockets admit the agent only.
 
 Deploy it:
 
