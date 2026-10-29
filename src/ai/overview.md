@@ -31,13 +31,25 @@ cluster of the collector, and is made of three components:
   questions that span clusters.
 
 ```text
-webapps of the clusters ── HTTPS ───────────────────────────┐
-collector interface ── HTTPS ──> collector /api/assistant ──┤
-                                                            ▼
-                                                          agent ── unix ──> om3-mcp ── HTTPS ──> daemons of the clusters
-                                                            │
-                                                            ├─── unix ──> oc3-mcp ── HTTPS ──> collector API
-                                                            └─── HTTPS ──> language model API
+   webapps of the clusters        collector interface
+              │                            │
+              │                          HTTPS
+              │                            ▼
+              │                collector /api/assistant
+              │                            │
+            HTTPS                        HTTPS
+              ▼                            ▼
+   ┌──────────────────────────────────────────────────────────────────┐
+   │       /v1/om3        agent         /v1/oc3                       │
+   └──────────────────────────────────────────────────────────────────┘
+              │                            │                  │
+         unix socket                  unix socket           HTTPS
+              ▼                            ▼                  ▼
+           om3-mcp                      oc3-mcp      language model API
+              │                            │
+            HTTPS                        HTTPS
+              ▼                            ▼
+   daemons of the clusters           collector API
 ```
 
 The agent serves two backends: `/v1/om3` for the webapps, the cluster of each
