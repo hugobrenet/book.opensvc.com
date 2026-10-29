@@ -15,7 +15,8 @@ MCPs, over HTTPS.
   webapp signs the users in with it ([Cluster API](../agent/configure.api.md)).
 * A language model API: OpenAI Responses or Chat Completions, Anthropic
   Messages, or a self-hosted server speaking one of them.
-* A DNS name for the service address, and a certificate for it.
+* A [cluster network](../agent/configure.networks.md) to give the service its
+  address, and the [cluster DNS](../agent/configure.dns.md) to name it.
 * For failover, a [pool](../agent/configure.pool.md) able to move a volume
   between the nodes, such as a `drbd` pool.
 * For the collector interface, a collector, version 3, whose users sign in
@@ -50,6 +51,15 @@ om system/sec/ai create
 om system/sec/ai key add --name OPENSVC_AI_LLM_API_TOKEN --from /path/to/token
 ```
 
+The agent and the MCPs present a certificate for the name the cluster DNS
+gives the service, `ai.system.svc.<cluster name>`, signed by the CA of the
+cluster ([Certificates](../agent/apps.design.certificates.md)):
+
+```bash
+om system/sec/ai-tls create --kw cn=ai.system.svc.cluster1 --kw ca=ca
+om system/sec/ai-tls certificate create
+```
+
 om3-mcp reads its [cluster catalogue](configure.md#the-cluster-catalogue),
 `clusters.yaml`, and, for external MCP clients only, its exchange profiles,
 `auth.yaml`, whose client secret goes in a sec:
@@ -67,10 +77,17 @@ nodes = n1 n2
 topology = failover
 orchestrate = start
 
+[container#0]
+type = docker
+image = ghcr.io/opensvc/pause
+rm = true
+hostname = {name}
+
 [ip#0]
-name = ai.example.com
-netmask = 24
-dev = br-prd
+type = netns
+# the cluster network the service takes its address from
+network = default
+netns = container#0
 
 # The conversations of the agent, moving with the service.
 [volume#state]
@@ -121,7 +138,7 @@ install = /agent.crt from ./sec/ai-tls key certificate_chain mode 0640 user root
 [container#om3mcp]
 type = docker
 image = ghcr.io/opensvc/om3-mcp:0.2.2
-netns = host
+netns = container#0
 rm = true
 restart = 3
 user = 994:982
@@ -135,7 +152,7 @@ environment = OPENSVC_MCP_DELEGATED_SOCKET=/run/opensvc-ai/sock/om3-mcp.sock
 [container#oc3mcp]
 type = docker
 image = ghcr.io/opensvc/oc3-mcp:0.1.2
-netns = host
+netns = container#0
 rm = true
 restart = 3
 user = 994:982
@@ -151,7 +168,7 @@ environment = OPENSVC_MCP_DELEGATED_SOCKET=/run/opensvc-ai/sock/oc3-mcp.sock
 [container#agent]
 type = docker
 image = ghcr.io/opensvc/ai-agent:0.2.1
-netns = host
+netns = container#0
 rm = true
 restart = 3
 user = 995:983
@@ -170,10 +187,16 @@ environment = OPENSVC_AI_LISTEN_ADDR=[::]:8090
 	OPENSVC_AI_CORS_ALLOWED_ORIGINS=https://cluster1.example.com:1215,https://cluster2.example.com:1215
 ```
 
-* `ip#0` gives the service its own address: the webapps and the collector
-  reach the agent at it, and it follows the service on failover. Its name is the name the
-  certificate of `system/sec/ai-tls` covers, which an acme task can renew
-  ([Certificates](../agent/apps.design.certificates.md)).
+* `container#0` holds the network namespace every container of the service
+  joins, and `ip#0` gives it an address of the cluster network `network`
+  names, which follows the service on failover. The agent listens on it, as
+  do the MCPs, without taking a port of the node. The cluster DNS names it
+  `ai.system.svc.<cluster name>`, the name of the certificate.
+* The network decides who reaches the service. A backend network, as a
+  `routed_bridge` one, is reached by the nodes of the cluster, so by the
+  daemons and a collector running on it. A browser calling the agent
+  directly, or an external MCP client, needs a `lan` network, and a
+  certificate it trusts.
 * `volume#state` holds the conversations. On a `drbd` pool, `shared = true`
   is required: the filesystem is made once, on the node the provision starts
   from, the peer receiving it by replication.
@@ -198,9 +221,10 @@ om system/svc/ai provision --wait
 ## Check
 
 ```bash
-curl https://ai.example.com:8090/health
+curl --cacert /var/lib/opensvc/certs/ca_certificates https://ai.system.svc.cluster1:8090/health
 ```
 
+from a node of the cluster, whose agent installs the CA of the cluster there.
 The agent answers `200` once it listens; it reaches the MCP sockets at each
 request, so it starts before them. Then open the assistant from a webapp,
 once [configured](configure.md#the-webapps), and ask "what is the state of the

@@ -96,10 +96,10 @@ agent in the configuration of the collector server:
 ```yaml
 server:
   assistant:
-    base_url: https://ai.example.com:8090
+    base_url: https://ai.system.svc.cluster1:8090
     path: /v1/oc3
-    # when the certificate of the agent is not signed by a public authority:
-    # ca_file: /etc/oc3/agent-ca.pem
+    # the CA of the cluster of the agent, which signs its certificate
+    ca_file: /etc/oc3/agent-ca.pem
 ```
 
 Without it, the interface offers no assistant. A user signed in with a
@@ -137,11 +137,13 @@ The webapp of each cluster offers the assistant when it is built with the
 address of the agent:
 
 ```bash
-VITE_AI_AGENT_URL=https://ai.example.com:8090 npm run build
+VITE_AI_AGENT_URL=https://ai.system.svc.cluster1:8090 npm run build
 ```
 
-The browser then calls the agent at that origin, which must allow the origin
-of each webapp, the daemon listeners the users open, comma separated:
+The browser then calls the agent at that origin: the service needs an
+address the browsers reach, on a `lan` network, and a certificate they trust.
+The agent must allow the origin of each webapp, the daemon listeners the
+users open, comma separated:
 
 ```bash
 om system/svc/ai config update --set "container#agent.environment+=OPENSVC_AI_CORS_ALLOWED_ORIGINS=https://cluster1.example.com:1215,https://cluster2.example.com:1215"
