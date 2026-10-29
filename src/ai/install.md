@@ -18,7 +18,7 @@ MCPs, over HTTPS.
 * A [cluster network](../agent/configure.networks.md) to give the service its
   address, and the [cluster DNS](../agent/configure.dns.md) to name it.
 * For failover, a [pool](../agent/configure.pool.md) able to move a volume
-  between the nodes, such as a `drbd` pool.
+  between the nodes with no data lost: `drbd`, a SAN array, or Ceph.
 * For the collector interface, a collector, version 3, whose users sign in
   with single sign-on.
 
@@ -93,7 +93,6 @@ netns = container#0
 # The conversations of the agent, moving with the service.
 [volume#state]
 name = {name}-state
-pool = drbd
 size = 1g
 shared = true
 install = /state/ mode 0700 user 995 group 983
@@ -112,7 +111,7 @@ install = /sock/ mode 2750 user 994 group 983
 	/om3conf/
 	/om3conf/server.crt from ./sec/ai-tls key certificate_chain required
 	/om3conf/server.key from ./sec/ai-tls key private_key required
-	/om3conf/clusters.yaml from ./cfg/om3-mcp required
+	/om3conf/clusters.yaml from ./cfg/om3-mcp key clusters.yaml required
 	/oc3conf/
 	/oc3conf/server.crt from ./sec/ai-tls key certificate_chain required
 	/oc3conf/server.key from ./sec/ai-tls key private_key required
@@ -182,9 +181,11 @@ environment = OPENSVC_AI_LISTEN_ADDR=[::]:8090
   daemons and a collector running on it. A browser calling the agent
   directly, or an external MCP client, needs a `lan` network, and a
   certificate it trusts.
-* `volume#state` holds the conversations. On a `drbd` pool, `shared = true`
-  is required: the filesystem is made once, on the node the provision starts
-  from, the peer receiving it by replication.
+* `volume#state` holds the conversations. `shared = true` picks a pool whose
+  volumes move between the nodes with no data lost, a `drbd` pool, a SAN
+  array or Ceph, whichever the cluster has, so the configuration is the same
+  on each, and makes the filesystem once, on the node the provision starts
+  from.
 * `OPENSVC_MCP_ACTIONS=enabled` offers the actions to the model, each one
   confirmed by the user; without it, the assistant only reads.
 * `container#oc3mcp` serves the collector, and the agent reaches it through
