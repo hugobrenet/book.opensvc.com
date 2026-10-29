@@ -221,10 +221,10 @@ om system/svc/ai provision --wait
 ## Check
 
 ```bash
-curl --cacert /var/lib/opensvc/certs/ca_certificates https://ai.system.svc.cluster1:8090/health
+sudo curl --cacert /var/lib/opensvc/certs/ca_certificates https://ai.system.svc.cluster1:8090/health
 ```
 
-from a node of the cluster, whose agent installs the CA of the cluster there.
+as root on a node of the cluster, whose agent installs the CA of the cluster there.
 The agent answers `200` once it listens; it reaches the MCP sockets at each
 request, so it starts before them. Then open the assistant from a webapp,
 once [configured](configure.md#the-webapps), and ask "what is the state of the

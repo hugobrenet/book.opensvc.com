@@ -59,7 +59,7 @@ corruption, which it replicates too.
 ## Logs and health
 
 ```bash
-curl --cacert /var/lib/opensvc/certs/ca_certificates https://ai.system.svc.cluster1:8090/health
+sudo curl --cacert /var/lib/opensvc/certs/ca_certificates https://ai.system.svc.cluster1:8090/health
 journalctl -t opensvc-ai-agent -t opensvc-mcp -t oc3-mcp
 ```
 
