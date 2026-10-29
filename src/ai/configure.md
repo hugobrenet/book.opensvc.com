@@ -109,14 +109,104 @@ the single sign-on only.
 ## External MCP clients
 
 The MCPs also serve MCP clients other than the agent, such as Claude Desktop,
-over HTTPS on their ports: a client signs in with OAuth, and the MCP exchanges
-its token for one of the daemon, or of the collector, through a confidential
-client of the OpenID provider (`auth.yaml`, its secret in a sec). This is
-optional: each MCP then installs its exchange profile and its secret in its
-configuration directory of `volume#ai`, `/om3conf/` or `/oc3conf/`, and sets
-its HTTPS listener, with the certificate the directory holds. It is set up in
-[om3-mcp authentication](https://github.com/opensvc/om3-mcp/blob/main/docs/authentication.md)
+over HTTPS on their ports. This is optional. A client signs in with OAuth at
+a public client of the identity provider, and calls the MCP with the token it
+gets. The MCP never passes that token on: for each call, it exchanges it, with
+OAuth 2.0 Token Exchange (RFC 8693), for a token of the daemon of the cluster,
+or of the collector, through a confidential client of the provider, the
+exchange client. The daemon or the collector then applies the grants of the
+user, as for the assistant.
+
+The provider must support Authorization Code with PKCE and the token exchange.
+Its setup, the public client, the exchange client and the claims the exchanged
+tokens carry, is described in
+[om3-mcp token exchange](https://github.com/opensvc/om3-mcp/blob/main/docs/token-exchange.md#sso-requirements)
 and [oc3-mcp configuration](https://github.com/opensvc/oc3-mcp/blob/main/docs/configuration.md#token-exchange).
+The MCPs need the settings below.
+
+### The listener
+
+Each MCP listens on HTTPS when its certificate is set, with these variables
+in its container environment:
+
+| Variable | Value |
+| --- | --- |
+| `OPENSVC_MCP_LISTEN_ADDR` | `[::]:8443` for om3-mcp, `[::]:8444` for oc3-mcp |
+| `OPENSVC_MCP_TLS_CERT_FILE`, `OPENSVC_MCP_TLS_KEY_FILE` | the certificate of the service, in the configuration directory of the MCP |
+| `OPENSVC_MCP_OAUTH_RESOURCE_URL` | the public URL of the MCP, ending in `/mcp`, such as `https://ai.example.com:8443/mcp`: the audience of the tokens the clients present |
+| `OPENSVC_MCP_OAUTH_ISSUER` | the issuer of the public client the clients sign in with |
+| `OPENSVC_MCP_AUTH_CONFIG_FILE` | the exchange profiles, `auth.yaml` |
+
+### The exchange profiles: auth.yaml
+
+`auth.yaml` describes the exchange client the MCP authenticates as, never its
+secret, which stays in a file of its own:
+
+```yaml
+version: 1
+profiles:
+  site-sso:
+    issuer: https://sso.example.com/application/o/om3-mcp-exchange/
+    client_id: om3-mcp-exchange
+    client_secret_file: /etc/opensvc-om3-mcp/secrets/om3-mcp-exchange
+    token_endpoint_auth_method: client_secret_basic
+    scopes: [opensvc-mcp]
+    request_timeout: 10s
+```
+
+| Key | Meaning |
+| --- | --- |
+| `profiles` | 1 to 64 profiles, each named: the clusters, or the collector, name the one they are exchanged with |
+| `issuer` | the HTTPS issuer of the exchange client: its discovery document gives the token endpoint |
+| `client_id` | the confidential exchange client |
+| `client_secret_file` | the absolute path of its secret: a regular file of one line, at most 16 KiB, mode `0600` or `0400`, owned by the account of the MCP, `994` |
+| `token_endpoint_auth_method` | `client_secret_basic`, the default, or `client_secret_post`, as the provider expects |
+| `scopes` | up to 32 scopes requested with each exchange, those for which the provider puts the claims of the user in the exchanged token |
+| `request_timeout` | 1 second to 1 minute, 10 seconds by default |
+| `tls.ca_file` | optional: the CA of the provider when it is not public; the TLS of the provider cannot be disabled |
+
+The MCP reads the secret at start: restart it after a rotation. In the
+service, `auth.yaml` comes from the cfg of the MCP and the secret from its
+sec, both installed in the configuration directory of the MCP in
+`volume#ai`:
+
+```ini
+	/om3conf/auth.yaml from ./cfg/om3-mcp key auth.yaml required
+	/om3conf/secrets/
+	/om3conf/secrets/om3-mcp-exchange from ./sec/om3-mcp key exchange mode 0400 user 994 required
+```
+
+### om3-mcp: the clusters
+
+Each cluster the external clients reach names, in the catalogue, the profile
+it is exchanged with and the audience of the tokens of its daemons, the
+client id the daemons trust, `listener.openid_client_id`:
+
+```yaml
+clusters:
+  cluster1:
+    # … as for the assistant, and:
+    auth:
+      profile: site-sso
+      audience: om3-cluster1
+```
+
+A cluster without `auth` is served to the assistant only: the external
+clients do not see it.
+
+### oc3-mcp: the collector
+
+oc3-mcp exchanges with one profile, for the collector:
+
+| Variable | Value |
+| --- | --- |
+| `OPENSVC_MCP_COLLECTOR_AUTH_PROFILE` | the profile of `auth.yaml` |
+| `OPENSVC_MCP_COLLECTOR_AUDIENCE` | the client id the collector trusts, the audience of the exchanged tokens |
+
+The scopes of its profile are those of the collector provider, for which the
+exchanged token carries the claims the rules of the collector test. The two
+variables and `OPENSVC_MCP_AUTH_CONFIG_FILE` go together: without them, the
+external clients list the tools, and their calls are refused.
 
 ## Conversations
 

@@ -30,6 +30,9 @@ cluster of the collector, and is made of three components:
   actions the agents reported, the orchestrations, the forms. It serves the
   questions that span clusters.
 
+The MCPs also serve [external MCP clients](#the-mcp-servers-alone) directly,
+without the agent.
+
 ```text
    webapps of the clusters        collector interface
               │                            │
@@ -55,6 +58,34 @@ cluster of the collector, and is made of three components:
 The agent serves two backends: `/v1/om3` for the webapps, the cluster of each
 request named by its `X-OpenSVC-Cluster-ID` header, and `/v1/oc3` for the
 collector.
+
+## The MCP servers alone
+
+The MCPs serve other MCP clients too, over HTTPS: Claude Desktop, an IDE, or
+an agent of the customer's own, with the model of their choice. A site may
+deploy the MCPs without the agent and the webapp chat, its users reaching the
+clusters and the collector from the client they already use:
+
+```text
+   external MCP client (Claude Desktop, an IDE, an agent…)
+           │                              │
+   HTTPS, OAuth sign-in           HTTPS, OAuth sign-in
+           ▼                              ▼
+    om3-mcp :8443                  oc3-mcp :8444
+           │                              │
+   HTTPS, token exchanged         HTTPS, token exchanged
+           ▼                              ▼
+ daemons of the clusters            collector API
+```
+
+The client signs the user in with OAuth, and calls the tools of the MCP with
+its token. For each call, the MCP exchanges that token for one of the daemon,
+or of the collector, carrying the grants of the same user: the rights are the
+user's, as with the assistant. The tools are the same; the client chooses
+them, and the confirmation of the actions is the client's: the MCP marks the
+tools that change the state, which a client asks the user to confirm, and
+`OPENSVC_MCP_ACTIONS` left disabled keeps the MCP read-only. The settings are
+in [External MCP clients](configure.md#external-mcp-clients).
 
 ## Whose rights
 
