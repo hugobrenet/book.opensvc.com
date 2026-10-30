@@ -177,7 +177,7 @@ sec, both installed in the configuration directory of the MCP in
 ```ini
 	/om3conf/auth.yaml from ./cfg/om3-mcp key auth.yaml required
 	/om3conf/secrets/
-	/om3conf/secrets/om3-mcp-exchange from ./sec/om3-mcp key exchange mode 0400 user 994 required
+	/om3conf/secrets/om3-mcp-exchange from ./sec/om3-mcp key exchange mode 0400 user {env.mcp_uid} required
 ```
 
 ### om3-mcp: the clusters

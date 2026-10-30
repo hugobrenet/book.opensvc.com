@@ -80,6 +80,13 @@ nodes = n1 n2
 topology = failover
 orchestrate = start
 
+# The accounts of the images, named once.
+[env]
+mcp_uid = 994
+mcp_gid = 982
+agent_uid = 995
+ai_gid = 983
+
 [container#0]
 type = docker
 image = ghcr.io/opensvc/pause
@@ -97,7 +104,7 @@ netns = container#0
 name = {name}-state
 size = 1g
 shared = true
-install = /state/ mode 0700 user 995 group 983
+install = /state/ mode 0700 user {env.agent_uid} group {env.ai_gid}
 
 # The sockets of the MCPs, and the configuration of each component, in
 # memory: nothing on the disk of the nodes, discarded at stop.
@@ -106,10 +113,10 @@ name = {name}-ai
 volatile = true
 size = 16m
 user = root
-group = 982
+group = {env.mcp_gid}
 perm = 0640
 dirperm = 0750
-install = /sock/ mode 2750 user 994 group 983
+install = /sock/ mode 2750 user {env.mcp_uid} group {env.ai_gid}
 	/om3conf/
 	/om3conf/server.crt from ./sec/ai-tls key certificate_chain required
 	/om3conf/server.key from ./sec/ai-tls key private_key required
@@ -117,9 +124,9 @@ install = /sock/ mode 2750 user 994 group 983
 	/oc3conf/
 	/oc3conf/server.crt from ./sec/ai-tls key certificate_chain required
 	/oc3conf/server.key from ./sec/ai-tls key private_key required
-	/agentconf/ group 983
-	/agentconf/agent.crt from ./sec/ai-tls key certificate_chain group 983 required
-	/agentconf/agent.key from ./sec/ai-tls key private_key group 983 required
+	/agentconf/ group {env.ai_gid}
+	/agentconf/agent.crt from ./sec/ai-tls key certificate_chain group {env.ai_gid} required
+	/agentconf/agent.key from ./sec/ai-tls key private_key group {env.ai_gid} required
 
 [container#om3mcp]
 type = docker
@@ -127,7 +134,7 @@ image = ghcr.io/opensvc/om3-mcp:0.2.3
 netns = container#0
 rm = true
 restart = 3
-user = 994:982
+user = {env.mcp_uid}:{env.mcp_gid}
 volume_mounts = /etc/localtime:/etc/localtime:ro
 	volume#ai:/om3conf:/etc/opensvc-om3-mcp:ro
 	volume#ai:/sock:/run/opensvc-ai/sock:rw
@@ -141,7 +148,7 @@ image = ghcr.io/opensvc/oc3-mcp:0.1.2
 netns = container#0
 rm = true
 restart = 3
-user = 994:982
+user = {env.mcp_uid}:{env.mcp_gid}
 volume_mounts = /etc/localtime:/etc/localtime:ro
 	volume#ai:/oc3conf:/etc/opensvc-oc3-mcp:ro
 	volume#ai:/sock:/run/opensvc-ai/sock:rw
@@ -157,7 +164,7 @@ image = ghcr.io/opensvc/ai-agent:0.2.1
 netns = container#0
 rm = true
 restart = 3
-user = 995:983
+user = {env.agent_uid}:{env.ai_gid}
 volume_mounts = /etc/localtime:/etc/localtime:ro
 	volume#ai:/agentconf:/etc/opensvc-ai:ro
 	volume#ai:/sock:/run/opensvc-ai/sock:ro
@@ -173,6 +180,8 @@ environment = OPENSVC_AI_LISTEN_ADDR=[::]:8090
 	OPENSVC_AI_CORS_ALLOWED_ORIGINS=https://cluster1.example.com:1215,https://cluster2.example.com:1215
 ```
 
+* `[env]` names the accounts of the images once, which the other keywords
+  read as `{env.<name>}`.
 * `container#0` holds the network namespace every container of the service
   joins, and `ip#0` gives it an address of the cluster network `network`
   names, which follows the service on failover. The agent listens on it, as
