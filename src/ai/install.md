@@ -11,6 +11,8 @@ MCPs, over HTTPS.
 
 * An OpenSVC v3 cluster to run it, tested with v3.0.0-rc53, with docker on its
   nodes.
+* For each cluster it serves, OpenSVC v3.0.0-rc56 or later, which publishes
+  `ai.agent_url` in the cluster status, and its webapp v1.0.0-rc9 or later.
 * For each cluster it serves, the OpenID provider its daemons trust: the
   webapp signs the users in with it ([Cluster API](../agent/configure.api.md)).
 * A language model API: OpenAI Responses or Chat Completions, Anthropic
@@ -121,7 +123,7 @@ install = /sock/ mode 2750 user 994 group 983
 
 [container#om3mcp]
 type = docker
-image = ghcr.io/opensvc/om3-mcp:0.2.2
+image = ghcr.io/opensvc/om3-mcp:0.2.3
 netns = container#0
 rm = true
 restart = 3

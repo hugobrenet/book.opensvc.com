@@ -63,6 +63,10 @@ clusters:
 The catalogue is described in
 [om3-mcp configuration](https://github.com/opensvc/om3-mcp/blob/main/docs/configuration.md#cluster-catalogue-and-exchange-profiles).
 
+The MCP reads the catalogue at start: after adding a cluster, restart it,
+`om system/svc/ai restart --rid container#om3mcp`. Until then, the agent
+answers the users of that cluster that they are not authenticated.
+
 ## The collector
 
 The collector needs two settings: oc3-mcp, for the model to read the
@@ -223,17 +227,24 @@ size of the volume of the service.
 
 ## The webapps
 
-The webapp of each cluster offers the assistant when it is built with the
-address of the agent:
+The webapp of each cluster offers the assistant when the cluster names the
+agent, in the `ai` section of its configuration:
 
 ```bash
-VITE_AI_AGENT_URL=https://ai.system.svc.cluster1:8090 npm run build
+om cluster config update --set ai.agent_url=https://ai.system.svc.cluster1:8090
 ```
 
-The browser then calls the agent at that origin: the service needs an
-address the browsers reach, on a `lan` network, and a certificate they trust.
-The agent must allow the origin of each webapp, the daemon listeners the
-users open, comma separated:
+The value is an https origin, the scheme, the host and the port only: another
+value is refused when written, and an invalid one found in the file is
+reported and left out of the cluster status. The webapp reads it from the
+cluster status once the user is signed in, and offers the assistant to the
+users signed in with OpenID, the only tokens the agent takes. Unset, the
+webapp offers no assistant. Set it on each cluster the agent serves.
+
+The browser then calls the agent at that origin, directly: the service needs
+an address the browsers reach, on a `lan` network, and a certificate they
+trust. The agent must allow the origin of each webapp, the daemon listeners
+the users open, comma separated:
 
 ```bash
 om system/svc/ai config update --set "container#agent.environment+=OPENSVC_AI_CORS_ALLOWED_ORIGINS=https://cluster1.example.com:1215,https://cluster2.example.com:1215"

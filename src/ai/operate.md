@@ -72,7 +72,8 @@ None holds a token, a prompt or a result.
 
 | Symptom | Cause |
 | --- | --- |
-| The webapp shows no assistant | Built without `VITE_AI_AGENT_URL` |
+| The webapp shows no assistant | `ai.agent_url` is unset or invalid in the cluster configuration, or the user signed in without OpenID |
+| Every message of a new cluster answers "Authentication required" | The MCP was not restarted after the cluster was added to the catalogue |
 | The browser console reports a CORS error | The origin of the webapp is not in `OPENSVC_AI_CORS_ALLOWED_ORIGINS` |
 | Every message answers "Authentication required" | The issuer or the client id of `delegation` in the catalogue differ from the daemon's: compare them with `GET /api/auth/info` |
 | "Agent busy. Try again later." | More turns at once than `OPENSVC_AI_MAX_CONCURRENT_ASKS`, 4 by default |
