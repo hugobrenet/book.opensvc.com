@@ -1,3 +1,4 @@
+<!-- llms: The actions on an object: start, stop, relocation, failure handling, data replication, run, resource filtering and logging, from the CLI and the API. -->
 # Action
 
 Every action below is available both from the command line and through the

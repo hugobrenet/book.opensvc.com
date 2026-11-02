@@ -1,3 +1,4 @@
+<!-- llms: How to change the configuration of an object: adding, modifying and deleting resources, interactively or not, batching, and waiting for propagation. -->
 # Update
 
 Configuration files are stored in `/etc/opensvc/`.

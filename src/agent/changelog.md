@@ -1,3 +1,4 @@
+<!-- llms: Where the agent changelog lives: the v2 to v3 migration prerequisites, the breaking changes and the v3 enhancements. -->
 # Changelog
 
 The agent changelog lives with the code, so it is never out of step with the

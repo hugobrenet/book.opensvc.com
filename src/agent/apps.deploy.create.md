@@ -1,3 +1,4 @@
+<!-- llms: How to create an object: from scratch, from another object, or from a manifest, and what a clone resets. -->
 # Create, Deploy
 
 The following actions only modify files in `/etc/opensvc`. No operating system configuration file is modified, so they are safe to experiment with.

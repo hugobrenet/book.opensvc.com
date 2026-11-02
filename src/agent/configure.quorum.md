@@ -1,3 +1,4 @@
+<!-- llms: Cluster quorum: enabling it, how nodes and arbitrators vote on a split-brain, configuring and testing arbitrators, and best practices. -->
 # Cluster Quorum
 
 When a peer is flagged as stale by all heartbeats, the daemon assumes the cluster is in a split-brain situation, as it cannot determine whether the stale peer has failed or is isolated.

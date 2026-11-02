@@ -1,3 +1,4 @@
+<!-- llms: How the resources of an object are provisioned and unprovisioned: provisioners, shared resources, and resources provisioned by hand. -->
 # Provisioning
 
 Creating an object writes a configuration. It does not create anything the

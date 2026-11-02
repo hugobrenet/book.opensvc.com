@@ -1,3 +1,4 @@
+<!-- llms: A worked example of quorum votes in a 3-node cluster over two sites with two arbitrators on a third: which nodes survive each failure. -->
 # Example: odd-nodes cluster
 
         +-------------------------------------------+                                

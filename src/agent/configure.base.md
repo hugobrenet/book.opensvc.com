@@ -1,3 +1,4 @@
+<!-- llms: The node configuration: its environment, the schedules of its jobs, its registration on a collector, the SAN switch inventory and the sysreport. -->
 # Node Configuration
 
 ## Set the Node Environment

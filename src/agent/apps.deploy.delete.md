@@ -1,3 +1,4 @@
+<!-- llms: How to remove an object: a purge stops, unprovisions and deletes it on every node; a delete removes its configuration only. -->
 # Purge, Delete
 
 > The **API** tabs assume the `$TOKEN` and the listener endpoint set up in

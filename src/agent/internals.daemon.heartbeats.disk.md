@@ -1,3 +1,4 @@
+<!-- llms: The hb.disk driver, heartbeats written on a shared disk: its configuration, behavior and on-disk format. -->
 # hb.disk
 
 This driver reads and writes on a dedicated disk, using `O_DIRECT|O_SYNC|O_DSYNC` open flags on a block device on Linux.

@@ -1,3 +1,4 @@
+<!-- llms: Cluster storage pools: how volumes get their disks and filesystems from a pool, access modes, pool selection, the pool commands, and examples. -->
 # Cluster Storage Pools
 
 Services can use `volume` resources to:
