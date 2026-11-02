@@ -17,10 +17,10 @@ KEYWORDS_URL ?= https://github.com/opensvc/om3/releases/download/$(KEYWORDS_VERS
 KWDIR = src/agent.reference.keywords
 KINDS = node cluster svc vol sec cfg usr
 
-.ONESHELL: kw summary changes
-.SILENT: kw summary changes
+.ONESHELL: kw summary changes llms
+.SILENT: kw summary changes llms
 
-all: summary build
+all: summary build llms
 
 # kw lays the keyword reference of a release into the tracked tree.
 #
@@ -83,3 +83,17 @@ summary:
 
 build:
 	mdbook build
+
+# llms publishes the book for the language models, after build: each page as
+# markdown next to its html page, the index llms.txt and the whole
+# llms-full.txt, after https://llmstxt.org. The markdown is the one mdbook
+# renders, its includes resolved: the renderer is turned on for this build
+# only, the html build keeping its layout.
+llms:
+	set -e
+	tmp=$$(mktemp -d)
+	trap "rm -rf $$tmp" EXIT
+	MDBOOK_OUTPUT__MARKDOWN='{}' mdbook build -d $$tmp 2>/dev/null
+	tools/llmstxt.py --summary src/SUMMARY.md --markdown $$tmp/markdown --out book \
+		--build "$$(git rev-parse --short HEAD)$$(git diff --quiet || echo -dirty) $$(date -u +%F)" \
+		--keywords-index $(KWDIR)/index.json

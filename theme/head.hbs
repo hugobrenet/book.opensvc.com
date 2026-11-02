@@ -1,3 +1,17 @@
+<!-- Markdown -->
+<!--
+The markdown of the page, and the llms.txt index of the book, for the language
+models, after https://llmstxt.org: "make llms" lays them next to the html
+pages. The print page, the whole book, has llms-full.txt for markdown.
+-->
+{{#if is_print}}
+<link rel="alternate" type="text/markdown" href="{{ path_to_root }}llms-full.txt">
+{{else}}
+<link rel="alternate" type="text/markdown" href="{{ path_to_root }}{{ path }}">
+{{/if}}
+<link rel="describedby" href="{{ path_to_root }}llms.txt">
+<!-- End markdown -->
+
 <!-- Version picker -->
 <script>
 // One book is built per agent release and deployed under its own path, so the
