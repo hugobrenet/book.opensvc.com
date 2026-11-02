@@ -88,7 +88,9 @@ build:
 # markdown next to its html page, the index llms.txt and the whole
 # llms-full.txt, after https://llmstxt.org. The markdown is the one mdbook
 # renders, its includes resolved: the renderer is turned on for this build
-# only, the html build keeping its layout.
+# only, the html build keeping its layout. mdbook cannot turn the html
+# renderer off the same way, so this builds the html a second time, in a
+# directory it then removes: a few seconds.
 llms:
 	set -e
 	tmp=$$(mktemp -d)

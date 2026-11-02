@@ -148,6 +148,19 @@ class NoteTest(unittest.TestCase):
         ]:
             self.assertEqual(llmstxt.note(path, text), want, path)
 
+    def test_a_sentence_leaning_on_what_comes_before_is_no_note(self):
+        for text, want in [
+            ("# X\n\nIn this case the pool drivers do it.\n\nPools give volumes their disks.\n", "Pools give volumes their disks."),
+            ("# X\n\nIt is started by the daemon. The daemon starts it at boot.\n", "The daemon starts it at boot."),
+            ("# X\n\nThis is done once. This page takes about five minutes.\n", "This page takes about five minutes."),
+        ]:
+            self.assertEqual(llmstxt.note("x.md", text), want, text)
+
+    def test_the_description_a_page_gives_of_itself(self):
+        text = "<!-- llms: How to install the agent\n   packages, by distribution. -->\n# Install\n\nThe packages are signed.\n"
+        self.assertEqual(llmstxt.note("agent/install.md", text), "How to install the agent packages, by distribution.")
+        self.assertEqual(llmstxt.note("agent.reference.keywords/svc/DEFAULT.md", "<!-- llms: The DEFAULT section. -->\n"), "The DEFAULT section.")
+
     def test_no_note_rather_than_one_that_says_nothing(self):
         for text in ["# X\n\nThe chapter follows that order:\n\n* one\n", "# X\n\n```\n=> node does not have quorum\n```\n",
                      "# X\n\n=> node does not have quorum, commits suicide\n", "# X\n\nKVM Live Migration\n"]:
@@ -189,15 +202,16 @@ class MainTest(unittest.TestCase):
         index = book.read("llms.txt")
         self.assertTrue(index.startswith(
             "# OpenSVC\n\n> Documents the purpose and usage of the OpenSVC infrastructure tools.\n\n"
-            "Build: abc1234 2026-11-02.\nKeyword reference: OpenSVC agent v3.0.0-rc56.\n\n## OpenSVC\n\n"
+            "Build: abc1234 2026-11-02.\n\nKeyword reference: OpenSVC agent v3.0.0-rc56.\n\n## OpenSVC\n\n"
             "- [Introduction](preamble/introduction.md): OpenSVC is an open-source software product.\n"), index)
         self.assertIn("## Agent\n\n- [Agent > Install](agent/install.md): The packages are signed by the OpenSVC key.\n", index)
         self.assertIn("- [Configure > Cluster Quorum](agent/configure.quorum.md): When a peer", index)
         self.assertIn("## AI Assistant\n\n- [AI Assistant > Install](ai/install.md)", index)
-        # The keyword reference is the optional section, the last.
+        # The keyword reference is the optional section, the last: the summary
+        # of each kind, not the sections it lists, published all the same.
         optional = index.split("## Optional\n\n")[1]
-        self.assertIn("- [svc > DEFAULT](agent.reference.keywords/svc/DEFAULT.md): The keywords of the `DEFAULT` sections", optional)
-        self.assertNotIn("##", optional)
+        self.assertEqual(optional, "- [svc](agent.reference.keywords/svc/SUMMARY.md): The sections of the svc configuration, each with its keywords.\n")
+        self.assertTrue(os.path.isfile(os.path.join(book.out, "agent.reference.keywords/svc/DEFAULT.md")))
 
         # Every page is laid next to its html page, the icons removed; the home
         # page is the first chapter, and the page of a missing URL its own.
@@ -212,6 +226,16 @@ class MainTest(unittest.TestCase):
         self.assertTrue(full.startswith("Keyword reference: OpenSVC agent v3.0.0-rc56.\n\n<!-- preamble/introduction.md -->\n\n# Introduction"), full[:120])
         self.assertIn("<!-- ai/install.md -->", full)
         self.assertNotIn("agent.reference.keywords/svc/DEFAULT.md", full)
+
+    def test_the_description_comment_is_not_published(self):
+        pages = dict(PAGES)
+        pages["agent/install.md"] = "<!-- llms: How to install the agent packages. -->\n" + PAGES["agent/install.md"]
+        book = Book(pages)
+        self.addCleanup(book.close)
+        self.assertEqual(book.run(), 0)
+        self.assertIn("- [Agent > Install](agent/install.md): How to install the agent packages.\n", book.read("llms.txt"))
+        self.assertEqual(book.read("agent/install.md"), PAGES["agent/install.md"])
+        self.assertNotIn("llms:", book.read("llms-full.txt"))
 
     def test_a_book_with_no_keyword_index_names_no_release(self):
         book = Book()

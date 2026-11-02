@@ -8,7 +8,7 @@ next to its html page, as <page>.md, and writes two files at the root:
     llms.txt       the index: the title of the book, what it is, the build
                    it is and the agent release its keyword reference
                    documents, then one line per page, its link, its title under
-                   those of the chapters above it, and its first sentence,
+                   those of the chapters above it, and what it is about,
                    under the part of the summary it is in.
     llms-full.txt  the agent release of the keyword reference, then every
                    page of the index but the optional ones, one after the
@@ -19,7 +19,14 @@ they insert removed. The home page, the first chapter, is index.md, and the
 page of a missing URL 404.md, as the html pages link them. The keyword
 reference, generated and as large as the rest of the book together, is
 listed under "Optional", the section the format names for what a reader may
-skip.
+skip: the summary of each kind and the pages of the reference, not the
+hundreds of sections the summaries list, for the index to stay one a model
+reads whole.
+
+What a page is about is the description its source gives in a comment,
+<!-- llms: ... -->, else its first sentence that stands alone: not one that
+announces a list or a configlet, nor one that leans on what comes before
+it, such as "In this case". The comment is not published.
 
 A page of the summary mdbook did not render fails the whole: an index never
 lists a page that is not there.
@@ -55,6 +62,12 @@ KEYWORDS = "agent.reference.keywords/"
 PART = re.compile(r"^# (.+?)\s*$")
 CHAPTER = re.compile(r"^(\s*)- \[(.+?)\]\((.*?)\)\s*$")
 ICON = re.compile(r'<i class="fa[^"]*"[^>]*></i>')
+# DESCRIPTION is the description a page gives of itself, for the index.
+DESCRIPTION = re.compile(r"<!--\s*llms:\s*(.*?)\s*-->\n?", re.S)
+# LEANING starts a sentence that leans on what comes before it. "This page"
+# or "This driver" names what the page is about, and stands alone.
+LEANING = re.compile(r"^(?:In (?:this|that|such) case|It|Its|They|Their|Then|Here|Thus|Hence|So|Such|These|Those|That|"
+                     r"Otherwise|Also|Likewise|The following|Once|This(?! (?:page|chapter|section|driver|howto|guide|book|document)\b))\b")
 LINK = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
 # TAG is an html element of the prose; a placeholder such as <name>, in code
 # or not, is text.
@@ -139,10 +152,14 @@ def sentences(paragraph):
 
 
 def note(path, text):
-    """What the index says of a page: the first sentence of its prose that
-    stands alone, not one that announces a list or a configlet, cut to
+    """What the index says of a page: the description it gives of itself, else
+    the first sentence of its prose that stands alone, not one that announces
+    a list or a configlet nor one that leans on what comes before, cut to
     MAX_NOTE characters; for the keyword reference, what section it
     documents. None rather than a sentence that says nothing."""
+    given = DESCRIPTION.search(text)
+    if given:
+        return " ".join(given.group(1).split())
     if path.startswith(KEYWORDS):
         parts = path[len(KEYWORDS):-len(".md")].split("/")
         if len(parts) == 2 and parts[1] == "SUMMARY":
@@ -155,12 +172,20 @@ def note(path, text):
             # A sentence starts with a word: "=> node ..." is output.
             if not sentence or not (sentence[0].isalnum() or sentence[0] in "`*_"):
                 continue
-            if sentence.endswith(":") or " = " in sentence or len(sentence.split()) < MIN_NOTE_WORDS:
+            if sentence.endswith(":") or " = " in sentence or len(sentence.split()) < MIN_NOTE_WORDS or LEANING.match(sentence):
                 continue
             if len(sentence) > MAX_NOTE:
                 sentence = sentence[: MAX_NOTE - 1].rsplit(" ", 1)[0] + "…"
             return sentence
     return None
+
+
+def indexed(path):
+    """Whether the index lists a page of the optional part: the keyword
+    reference lists the summary of each kind and its own pages, a section
+    of a kind being reached from the summary of its kind."""
+    rest = path[len(KEYWORDS):] if path.startswith(KEYWORDS) else path
+    return "/" not in rest or rest.endswith("/SUMMARY.md")
 
 
 def keyword_release(path):
@@ -194,7 +219,7 @@ def main():
     full = []
     release = keyword_release(args.keywords_index)
     if release:
-        index.append(f"Keyword reference: OpenSVC agent {release}.")
+        index += ["", f"Keyword reference: OpenSVC agent {release}."]
         full.append(f"Keyword reference: OpenSVC agent {release}.\n")
     parts = chapters(args.summary)
     missing = [path for _, pages in parts for _, path in pages if not os.path.isfile(os.path.join(args.markdown, path))]
@@ -213,14 +238,17 @@ def main():
         for title, path in pages:
             with open(os.path.join(args.markdown, path)) as f:
                 text = ICON.sub("", f.read())
+            summary = note(path, text)
+            text = DESCRIPTION.sub("", text, count=1)
             write(path, text)
             # The home page is the first chapter, as mdbook writes it to
             # index.html.
             if number == 0 and not lines:
                 write("index.md", text)
-            summary = note(path, text)
-            lines.append(f"- [{title}]({path})" + (f": {summary}" if summary else ""))
-            if not (part or "").startswith(OPTIONAL):
+            optional_part = (part or "").startswith(OPTIONAL)
+            if not optional_part or indexed(path):
+                lines.append(f"- [{title}]({path})" + (f": {summary}" if summary else ""))
+            if not optional_part:
                 full.append(f"<!-- {path} -->\n\n{text.strip()}\n")
         if (part or "").startswith(OPTIONAL):
             optional += lines
