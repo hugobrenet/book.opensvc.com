@@ -61,3 +61,36 @@
 .tabs-ready > .tab > pre:first-child {
     margin-top: 0.8em;
 }
+
+/* Markdown buttons.
+ *
+ * Their icons are svgs in a span of class fa-svg, as mdbook 0.5 draws its
+ * own, and take the rules of its theme there. mdbook 0.4 draws its icons with
+ * a font, under #menu-bar, and has no rule for fa-svg: these give the icons
+ * the size, color and room of its others. */
+#menu-bar .fa-svg {
+    position: relative;
+    padding: 0 8px;
+    z-index: 10;
+    line-height: var(--menu-bar-height);
+    cursor: pointer;
+    transition: color 0.5s;
+    color: var(--icons);
+}
+
+#menu-bar .fa-svg:hover {
+    color: var(--icons-hover);
+}
+
+#menu-bar .fa-svg svg {
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+    margin-bottom: -0.1em;
+}
+
+@media only screen and (max-width: 420px) {
+    #menu-bar .fa-svg {
+        padding: 0 5px;
+    }
+}
