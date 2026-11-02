@@ -97,3 +97,7 @@ llms:
 	tools/llmstxt.py --summary src/SUMMARY.md --markdown $$tmp/markdown --out book \
 		--build "$$(git rev-parse --short HEAD)$$(git diff --quiet || echo -dirty) $$(date -u +%F)" \
 		--keywords-index $(KWDIR)/index.json
+
+# test runs the tests of tools/llmstxt.py, on a book of a few pages.
+test:
+	python3 -B -m unittest tools/llmstxt_test.py
