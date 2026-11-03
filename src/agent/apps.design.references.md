@@ -1,3 +1,4 @@
+<!-- llms: References, the markers a keyword value carries and evaluation replaces: within a configuration or a section, hard coded, capacity, arithmetic and env. -->
 # References
 
 A reference is a marker in the value of a configuration keyword, replaced during evaluation.

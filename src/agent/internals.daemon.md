@@ -1,3 +1,4 @@
+<!-- llms: The subsystems of the daemon, events, heartbeats, lifecycle, quorum and scheduler: their role and policies. -->
 # Daemon
 
 This chapter explores the role and policies of daemon subsystems, providing a detailed look at their function within the system architecture. You’ll also learn best practices for daemon administration, including configuration, monitoring, and troubleshooting.

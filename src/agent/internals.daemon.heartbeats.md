@@ -1,3 +1,4 @@
+<!-- llms: Heartbeats: their configuration and reconfiguration, timeouts, dropping one, monitoring, and their transmit and receive threads. -->
 # Heartbeats
 
 Heartbeats serve the following purposes:

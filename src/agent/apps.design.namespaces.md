@@ -1,3 +1,4 @@
+<!-- llms: Namespaces: object paths within them, cloning into a namespace, and the claims of a namespace on pools, networks and compute. -->
 # Namespaces
 
 Namespaces allow users to create objects with the same name in different naming spaces.

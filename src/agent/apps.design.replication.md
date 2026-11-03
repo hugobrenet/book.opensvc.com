@@ -1,3 +1,4 @@
+<!-- llms: Data replication of a failover service on local disks: choosing the peers, reading the status of a sync, the recovery point objective, and ZFS replication. -->
 # Data Replication
 
 A failover service whose data lives on local disks needs a copy of that data on

@@ -59,6 +59,15 @@ changed, say so in place rather than forking the page:
 The agent CHANGELOG remains the upgrade document. This is for the sentence a
 reader would otherwise act on without knowing it changed.
 
+## Language models
+
+The book is published for the language models after the convention of
+https://llmstxt.org: `llms.txt` at the root is the index of the pages,
+`llms-full.txt` the whole book in one file, and every page is also served as
+markdown next to its html page, `<page>.md`. `make` builds them with the
+html; each page opens with the description `llms.txt` gives of it, in a
+`<!-- llms: ... -->` comment.
+
 ## License
 
 The text and the images of the book are licensed under the Creative Commons

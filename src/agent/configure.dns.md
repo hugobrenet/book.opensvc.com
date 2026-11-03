@@ -1,3 +1,4 @@
+<!-- llms: The cluster DNS, the agent daemon serving records as a PowerDNS backend: the records, the deployment of the DNS service and the resolver of the nodes. -->
 # Cluster Domain Name Server
 
 The OpenSVC agent daemon can act as a remote backend for PowerDNS, serving dynamic records for services deployed within the cluster. This functionality is particularly useful when services are assigned IP addresses on private backends with internal IPAM.

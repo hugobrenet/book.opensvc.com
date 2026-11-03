@@ -1,3 +1,4 @@
+<!-- llms: The lifecycle of the agent daemon: enable, boot, shutdown, stop, restart, rejoin, run, and its watchdog. -->
 # Agent Daemon Lifecycle
 
 ## Enable

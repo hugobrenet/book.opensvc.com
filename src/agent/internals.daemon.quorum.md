@@ -1,3 +1,4 @@
+<!-- llms: How quorum breaks the tie when every heartbeat to a peer goes stale: arbitrators vote, and a node without a majority stops. -->
 # Quorum
 
 When every heartbeat to a peer goes stale, a node cannot tell whether that peer

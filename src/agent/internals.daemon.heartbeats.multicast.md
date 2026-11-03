@@ -1,3 +1,4 @@
+<!-- llms: The hb.multicast driver, heartbeats sent over UDP multicast: its basic and advanced configuration and its behavior. -->
 # hb.multicast
 
 The hb.multicast driver sends and receives using UDP multicast packets.

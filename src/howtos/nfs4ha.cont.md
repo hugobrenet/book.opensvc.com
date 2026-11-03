@@ -1,3 +1,4 @@
+<!-- llms: A highly available NFSv4 service in containers, on LVM2, DRBD and Podman, deployed with OpenSVC. -->
 # NFS4 High Availability Setup - Container Integration
 
 This howto describes a NFS4-only HA service setup using modern OpenSVC features.

@@ -1,3 +1,4 @@
+<!-- llms: TLS certificates kept in secrets: their keys, generating one, obtaining one from an ACME directory, and renewing it. -->
 # Certificates
 
 A `sec` holds a TLS certificate as it holds any secret: as keys, encrypted at

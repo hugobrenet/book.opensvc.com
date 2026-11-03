@@ -1,3 +1,4 @@
+<!-- llms: How to upgrade the agent with no service downtime, on Debian, Ubuntu, Red Hat Enterprise Linux and SuSE. -->
 # Upgrade
 
 The agent supports upgrading with zero service down-time.

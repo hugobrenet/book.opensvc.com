@@ -1,3 +1,4 @@
+<!-- llms: A worked example of quorum votes in a 2-node cluster over two sites with an arbitrator on a third: which node survives each failure. -->
 # Example: even-nodes cluster
 
         +-------------------------------------------+                                

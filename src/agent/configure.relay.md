@@ -1,3 +1,4 @@
+<!-- llms: The relay, a standalone OpenSVC server on a third site serving relay heartbeats and quorum votes: v2 and v3 compatibility, and its setup. -->
 # Cluster Relay
 
 A relay is typically installed on a third site to provide two services to clusters:

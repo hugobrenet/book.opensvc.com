@@ -1,3 +1,4 @@
+<!-- llms: Configs and secrets: the data of an application kept in a datastore and installed where the application reads it, shared across namespaces or rendered from templates. -->
 # Configs and Secrets
 
 An application needs configuration files, certificates and credentials. Baking

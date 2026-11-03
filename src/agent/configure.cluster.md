@@ -1,3 +1,4 @@
+<!-- llms: How to bootstrap a cluster: its heartbeats and stonith methods, enrolling and evicting nodes, and registering on a collector. -->
 # Cluster Configuration
 
 Upon agent installation, the node is considered part of its own 1-node cluster.

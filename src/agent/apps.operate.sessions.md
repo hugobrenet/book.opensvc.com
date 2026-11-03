@@ -1,3 +1,4 @@
+<!-- llms: How to follow an action submitted to the daemon: its session, execution and orchestration ids, what runs now, how to stop it, and what it logged. -->
 # Follow an Action
 
 An action submitted to the daemon returns before it is done. What comes back

@@ -1,3 +1,4 @@
+<!-- llms: How to grow a volume through the chain of resources it rests on: the commands, the plan, the stages, the limits of a namespace and what is refused. -->
 # Grow a Volume
 
 A volume rests on a chain of resources: a filesystem on a replicated device on

@@ -1,3 +1,4 @@
+<!-- llms: The syntax of the agent configuration files: ini sections and keywords, values scoped to nodes, policies, and syntax validation. -->
 # Agent Configuration
 
 ## Concepts

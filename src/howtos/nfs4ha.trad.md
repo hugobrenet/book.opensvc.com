@@ -1,3 +1,4 @@
+<!-- llms: A highly available NFSv4 service with the fewest virtualization layers: setup, deployment, clients, and switch and failover tests. -->
 # NFS4 High Availability Setup - Traditional Integration
 
 This howto describes a NFS4-only HA service setup using the least possible virtualization layers (no persistent volume, no cluster backend network IP address, no ingress gateway, no container), to maximize efficiency and robustness.

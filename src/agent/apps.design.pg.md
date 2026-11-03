@@ -1,3 +1,4 @@
+<!-- llms: Resource capping: the slice an object runs in, and capping an object, a resource or a namespace, running or not. -->
 # Resource Capping
 
 A misbehaving application should not be able to take a node down with it. The

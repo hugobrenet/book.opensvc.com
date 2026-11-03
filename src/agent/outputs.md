@@ -1,3 +1,4 @@
+<!-- llms: The output formats of the om query commands: human-readable, custom tables, machine-readable, flat key-values and templates. -->
 # Outputs
 
 The `om` query commands display the data using a human-readable renderer by default. The `-o` command flag can be used to select another renderer.

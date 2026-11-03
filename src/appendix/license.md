@@ -1,3 +1,4 @@
+<!-- llms: The license of this book, CC BY 4.0, and how to credit it. -->
 # License
 
 The text and the images of this book are licensed under the

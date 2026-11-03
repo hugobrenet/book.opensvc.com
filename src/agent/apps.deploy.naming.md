@@ -1,3 +1,4 @@
+<!-- llms: How objects are named: the <namespace>/<kind>/<name> path, the kinds svc, vol, cfg, sec and ccfg, and the rules of each part. -->
 # Naming
 
 A fully qualified object name is formatted as ``<namespace>/<kind>/<name>``.

@@ -1,3 +1,4 @@
+<!-- llms: Cluster quorum: enabling it, how nodes and arbitrators vote on a split-brain, configuring and testing arbitrators, and best practices. -->
 # Cluster Quorum
 
 When a peer is flagged as stale by all heartbeats, the daemon assumes the cluster is in a split-brain situation, as it cannot determine whether the stale peer has failed or is isolated.
@@ -110,7 +111,13 @@ Any OpenSVC agent can act as an arbitrator, and multiple arbitrators can be conf
 ### Use a tcp server as an arbitrator
 
     [arbitrator#a2]
+    # 22, the ssh port of dev2n2: with no port, listener.port is implied
     uri = dev2n2:22
+
+The vote of a tcp arbitrator is a TCP connect to its uri. The port of the
+uri is optional: with none, the port of the cluster listener is implied,
+`listener.port`, 1215 by default. An arbitrator still listening on the 1214
+port of a v2 agent must name it in the uri.
 
 ## Testing Arbitrators
 

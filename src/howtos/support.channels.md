@@ -1,3 +1,4 @@
+<!-- llms: The channels to reach OpenSVC support: Mattermost, tickets, email and phone. -->
 # Support Channels
 
 To open a service request, you can use one of the four following methods:

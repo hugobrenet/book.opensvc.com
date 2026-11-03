@@ -1,3 +1,4 @@
+<!-- llms: Commercial support for OpenSVC: how to be assisted, the support open hours, and premium support. -->
 # Get Support
 
 ## Introduction

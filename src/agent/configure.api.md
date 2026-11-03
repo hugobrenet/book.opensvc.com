@@ -1,3 +1,4 @@
+<!-- llms: The cluster API: how it is reached, its authentication methods, basic, X.509 certificates and JWT from an OpenID server, and its local users. -->
 # Cluster API
 
 The Cluster API provides remote access to the OpenSVC cluster management and monitoring functionality. It is accessible through the **agent listener** on any running cluster node.

@@ -1,3 +1,4 @@
+<!-- llms: Why the agent did something: where it installs its files, the ids it names its work with, and the daemon behind every cluster-wide behavior. -->
 # Internals
 
 This chapter is for when you want to know why the agent did something, not how

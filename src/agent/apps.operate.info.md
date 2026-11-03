@@ -1,3 +1,4 @@
+<!-- llms: Resource info, the key-values each resource publishes about what it is made of: reading and refreshing them, their centralization, and adding your own. -->
 # Resource Info
 
 Each resource of an instance publishes a set of key-values describing what it

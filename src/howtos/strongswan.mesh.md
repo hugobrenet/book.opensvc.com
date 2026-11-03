@@ -1,3 +1,4 @@
+<!-- llms: Encrypting with strongSwan the traffic between the nodes of a routed bridge network, rendered and run by an OpenSVC service: its key, configuration and checks. -->
 # strongSwan Mesh
 
 A [routed bridge](../agent/configure.networks.md#routed-bridge) network

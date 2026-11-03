@@ -1,3 +1,4 @@
+<!-- llms: The scheduler of the agent: schedule definitions, policies, the node and service schedules, event-triggered runs, and examples. -->
 # Scheduler
 
 The OpenSVC agent includes a scheduler that manages jobs for both the node and each individual service.

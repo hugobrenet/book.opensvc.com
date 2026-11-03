@@ -1,3 +1,4 @@
+<!-- llms: Scoping, a keyword value set for a node or a group of nodes: its syntax, the supported scopes, precedence and examples. -->
 # Scoping
 
 One configuration is shared by every node running the object. Scoping is how a

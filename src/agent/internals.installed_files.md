@@ -1,3 +1,4 @@
+<!-- llms: The directories, executable files and configuration files the agent installs. -->
 # Installed Items
 
 ## Directories

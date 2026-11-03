@@ -1,3 +1,4 @@
+<!-- llms: Designing applications: splitting them into objects, and choosing their topology, failover or flex. -->
 # Design Apps
 
 Applications are composed of one or more objects (services, configs, secrets, volumes, service accounts).

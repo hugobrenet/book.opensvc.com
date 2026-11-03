@@ -1,3 +1,4 @@
+<!-- llms: Operating applications: assessing the cluster and service states, reading resource info, selecting objects, running actions and following them. -->
 # Operate Apps
 
 Usual operator actions covered in this chapter are:

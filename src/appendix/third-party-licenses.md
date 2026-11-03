@@ -1,3 +1,4 @@
+<!-- llms: The licenses of the third-party components mdBook copies into every page of this book. -->
 # Third-party licenses
 
 This book is built with [mdBook](https://github.com/rust-lang/mdBook), which
