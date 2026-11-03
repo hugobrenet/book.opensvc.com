@@ -16,7 +16,8 @@ next to its html page, as <page>.md, and writes two files at the root:
 
 The pages are the markdown mdbook renders, its includes resolved, the icons
 they insert removed. The home page, the first chapter, is index.md, and the
-page of a missing URL 404.md, as the html pages link them. The keyword
+page of a missing URL 404.md, its html layout removed, as the html pages
+link them. The keyword
 reference, generated and as large as the rest of the book together, is
 listed under "Optional", the section the format names for what a reader may
 skip: the summary of each kind and the pages of the reference, not the
@@ -69,6 +70,8 @@ KEYWORDS = "agent.reference.keywords/"
 PART = re.compile(r"^# (.+?)\s*$")
 CHAPTER = re.compile(r"^(\s*)- \[(.+?)\]\((.*?)\)\s*$")
 ICON = re.compile(r'<i class="fa[^"]*"[^>]*></i>')
+# A line of html, the layout of a page written for the browser.
+HTML_LINE = re.compile(r"^[ \t]*</?[A-Za-z][^>]*>.*(?:\n|$)", re.M)
 # DESCRIPTION is the description a page gives of itself, for the index.
 DESCRIPTION = re.compile(r"<!--\s*llms:\s*(.*?)\s*-->\n?", re.S)
 # MAX_DESCRIPTION bounds a description: one line of the index.
@@ -225,10 +228,12 @@ def main():
         index += ["", "## Optional", ""] + optional
 
     # The page mdbook shows for a missing URL is no chapter, and its source
-    # has no include to resolve.
+    # has no include to resolve. Its html is the layout of the page and the
+    # buttons a script fills for the browser: the text is what is left.
     missing_page = config.get("output", {}).get("html", {}).get("input-404", "404.md")
     with open(os.path.join(os.path.dirname(args.summary), missing_page)) as f:
-        write("404.md", ICON.sub("", f.read()))
+        text = HTML_LINE.sub("", ICON.sub("", f.read()))
+        write("404.md", re.sub(r"\n{3,}", "\n\n", text).strip() + "\n")
 
     with open(os.path.join(args.out, "llms.txt"), "w") as f:
         f.write("\n".join(index) + "\n")

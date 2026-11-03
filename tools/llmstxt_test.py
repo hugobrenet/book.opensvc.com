@@ -80,7 +80,9 @@ class Book:
         root = self.dir.name
         self.config = self.file("book.toml", CONFIG)
         self.summary = self.file("src/SUMMARY.md", SUMMARY)
-        self.file("src/not-found.md", "# Document not found (404)\n")
+        self.file("src/not-found.md", '<div class="not-found">\n\n<p class="not-found-code" aria-hidden="true">404</p>\n\n'
+                  "# Document not found (404)\n\nThis page is not in the book.\n\n<p>\n"
+                  '<a class="button" href="index.html">Home</a>\n</p>\n\n</div>\n')
         self.index = self.file("src/agent.reference.keywords/index.json", json.dumps({"version": release, "keywords": []}))
         self.markdown = os.path.join(root, "markdown")
         for path, text in pages.items():
@@ -201,7 +203,7 @@ class MainTest(unittest.TestCase):
                          "# Cluster Quorum\n\nWhen a peer is flagged as stale by all heartbeats, the daemon assumes a split-brain.\n")
         self.assertEqual(book.read("agent/install.md"), BODIES["agent/install.md"])
         self.assertEqual(book.read("index.md"), BODIES["preamble/introduction.md"])
-        self.assertEqual(book.read("404.md"), "# Document not found (404)\n")
+        self.assertEqual(book.read("404.md"), "# Document not found (404)\n\nThis page is not in the book.\n")
         for path in PAGES:
             self.assertTrue(os.path.isfile(os.path.join(book.out, path)), path)
 
