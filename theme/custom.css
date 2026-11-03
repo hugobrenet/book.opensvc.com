@@ -358,3 +358,8 @@ html.sidebar-visible #search-toggle,
 html.sidebar-visible #mdbook-search-toggle {
     display: none;
 }
+
+/* The headings of the page read fold with its chapter. */
+.chapter li.chapter-item:not(.expanded) > .on-this-page {
+    display: none;
+}

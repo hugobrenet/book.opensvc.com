@@ -389,3 +389,39 @@
   place();
   new MutationObserver(place).observe(html, { attributes: true, attributeFilter: ["class"] });
 })();
+
+// Headings of the page read.
+//
+// mdbook 0.5 lists the headings of the page read under its chapter in the
+// sidebar, with no way to fold them. The chevron of the chapter folds them
+// with its sub-chapters, and a chapter with no sub-chapters gets one. The
+// list is built when the document is loaded, after this script runs.
+(function () {
+  function init() {
+    var headings = document.querySelector(".sidebar .chapter .on-this-page");
+    var chapter = headings && headings.parentElement;
+    var wrapper = chapter && chapter.querySelector(":scope > .chapter-link-wrapper");
+    if (!wrapper) {
+      return;
+    }
+    chapter.classList.add("expanded");
+    if (wrapper.querySelector(":scope > .chapter-fold-toggle")) {
+      return;
+    }
+    var toggle = document.createElement("a");
+    toggle.className = "chapter-fold-toggle";
+    toggle.setAttribute("role", "button");
+    toggle.setAttribute("aria-label", "Fold the headings of this page");
+    toggle.innerHTML = "<div>❱</div>";
+    toggle.addEventListener("click", function () {
+      chapter.classList.toggle("expanded");
+    });
+    wrapper.appendChild(toggle);
+  }
+
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
