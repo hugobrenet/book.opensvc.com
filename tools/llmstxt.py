@@ -23,13 +23,20 @@ skip: the summary of each kind and the pages of the reference, not the
 hundreds of sections the summaries list, for the index to stay one a model
 reads whole.
 
-What a page is about is the description its source gives in a comment,
-<!-- llms: ... -->, else its first sentence that stands alone: not one that
-announces a list or a configlet, nor one that leans on what comes before
-it, such as "In this case". The comment is not published.
+What a page is about is the description its source gives in a comment, its
+first lines, as a page of Mintlify gives it in the description of its front
+matter, mdbook having none:
 
-A page of the summary mdbook did not render fails the whole: an index never
-lists a page that is not there.
+    <!-- llms: How to install the agent packages, on Debian, Ubuntu, ... -->
+    # Install
+
+It is the one source: nothing is guessed from the text. The comment is not
+published. The keyword reference, generated, describes its pages itself.
+
+A page of the summary mdbook did not render, a page with no description, or
+one longer than MAX_DESCRIPTION characters, fails the whole:
+an index never lists a page that is not there, nor one it cannot say what it
+is about.
 
 Usage:
     llmstxt.py --summary src/SUMMARY.md --markdown <markdown build> \\
@@ -64,21 +71,8 @@ CHAPTER = re.compile(r"^(\s*)- \[(.+?)\]\((.*?)\)\s*$")
 ICON = re.compile(r'<i class="fa[^"]*"[^>]*></i>')
 # DESCRIPTION is the description a page gives of itself, for the index.
 DESCRIPTION = re.compile(r"<!--\s*llms:\s*(.*?)\s*-->\n?", re.S)
-# LEANING starts a sentence that leans on what comes before it. "This page"
-# or "This driver" names what the page is about, and stands alone.
-LEANING = re.compile(r"^(?:In (?:this|that|such) case|It|Its|They|Their|Then|Here|Thus|Hence|So|Such|These|Those|That|"
-                     r"Otherwise|Also|Likewise|The following|Once|This(?! (?:page|chapter|section|driver|howto|guide|book|document)\b))\b")
-LINK = re.compile(r"!?\[([^\]]*)\]\([^)]*\)")
-# TAG is an html element of the prose; a placeholder such as <name>, in code
-# or not, is text.
-TAG = re.compile(r"</?(a|abbr|b|br|code|div|em|i|kbd|small|span|strong|sub|sup)\b[^>]*>")
-# MARKS open a line of the book without being words, such as its info sign.
-MARKS = "🛈⚠ "
-END = re.compile(r"[.!?](?=\s|$)")
-# ABBREVIATIONS end with a dot and no sentence.
-ABBREVIATIONS = ("e.g", "i.e", "etc", "vs", "cf")
-MAX_NOTE = 200
-MIN_NOTE_WORDS = 4
+# MAX_DESCRIPTION bounds a description: one line of the index.
+MAX_DESCRIPTION = 200
 
 
 def chapters(summary):
@@ -115,68 +109,23 @@ def chapters(summary):
     return [[part, [((f"{part} > {title}" if part and seen[title] > 1 else title), path) for title, path in pages]] for part, pages in parts]
 
 
-def paragraphs(text):
-    """The paragraphs of prose of a page, in order: its headings, html,
-    tables, quotes, lists and code apart, each on one line, links and tags
-    reduced to their text."""
-    fenced = False
-    paragraph = []
-    for line in text.splitlines() + [""]:
-        stripped = line.strip()
-        if stripped.startswith("```"):
-            fenced = not fenced
-            continue
-        # Prose starts at the margin: an indented line is code, or the rest
-        # of a list item; a line of cells is a table.
-        prose = not fenced and stripped and not line[0].isspace() and stripped.count("|") < 2 and \
-            not stripped.startswith(("#", "<", ">", "*", "-", "!", "+"))
-        if prose:
-            paragraph.append(stripped)
-        elif paragraph:
-            yield TAG.sub("", LINK.sub(r"\1", " ".join(paragraph)))
-            paragraph = []
-
-
-def sentences(paragraph):
-    """The sentences of a paragraph, an abbreviation such as e.g. ending
-    none."""
-    start = 0
-    for end in END.finditer(paragraph):
-        before = paragraph[start:end.start()].rsplit(" ", 1)[-1].lower()
-        if before in ABBREVIATIONS:
-            continue
-        yield paragraph[start:end.end()].strip()
-        start = end.end()
-    if paragraph[start:].strip():
-        yield paragraph[start:].strip()
-
-
 def note(path, text):
-    """What the index says of a page: the description it gives of itself, else
-    the first sentence of its prose that stands alone, not one that announces
-    a list or a configlet nor one that leans on what comes before, cut to
-    MAX_NOTE characters; for the keyword reference, what section it
-    documents. None rather than a sentence that says nothing."""
-    given = DESCRIPTION.search(text)
-    if given:
-        return " ".join(given.group(1).split())
+    """What the index says of a page: the description its source gives, its
+    whitespace folded; for a page of the keyword reference, generated, what
+    it documents. None when a page written by hand gives none."""
     if path.startswith(KEYWORDS):
         parts = path[len(KEYWORDS):-len(".md")].split("/")
+        if parts == ["changes"]:
+            return "What each release of the agent added, removed and changed in the keywords."
+        if parts == ["removed"]:
+            return "The keywords the agent no longer has, and the release that removed each."
         if len(parts) == 2 and parts[1] == "SUMMARY":
             return f"The sections of the {parts[0]} configuration, each with its keywords."
         if len(parts) == 2:
             return f"The keywords of the `{parts[1]}` sections of the {parts[0]} configuration."
-    for paragraph in paragraphs(text):
-        for sentence in sentences(paragraph):
-            sentence = sentence.lstrip(MARKS)
-            # A sentence starts with a word: "=> node ..." is output.
-            if not sentence or not (sentence[0].isalnum() or sentence[0] in "`*_"):
-                continue
-            if sentence.endswith(":") or " = " in sentence or len(sentence.split()) < MIN_NOTE_WORDS or LEANING.match(sentence):
-                continue
-            if len(sentence) > MAX_NOTE:
-                sentence = sentence[: MAX_NOTE - 1].rsplit(" ", 1)[0] + "…"
-            return sentence
+    given = DESCRIPTION.search(text)
+    if given:
+        return " ".join(given.group(1).split()) or None
     return None
 
 
@@ -225,6 +174,24 @@ def main():
     missing = [path for _, pages in parts for _, path in pages if not os.path.isfile(os.path.join(args.markdown, path))]
     if missing:
         print("pages of the summary not rendered: " + ", ".join(missing), file=sys.stderr)
+        sys.exit(1)
+
+    # Every page written by hand says what it is about, and in one line.
+    undescribed, long = [], []
+    for _, pages in parts:
+        for _, path in pages:
+            with open(os.path.join(args.markdown, path)) as f:
+                summary = note(path, f.read())
+            if summary is None:
+                undescribed.append(path)
+            elif summary and len(summary) > MAX_DESCRIPTION:
+                long.append(f"{path} ({len(summary)})")
+    if undescribed:
+        print("pages with no description, an <!-- llms: ... --> comment for a page written by hand, "
+              "a case of note() for a page of the keyword reference: " + ", ".join(undescribed), file=sys.stderr)
+    if long:
+        print(f"descriptions longer than {MAX_DESCRIPTION} characters: " + ", ".join(long), file=sys.stderr)
+    if undescribed or long:
         sys.exit(1)
 
     def write(path, text):

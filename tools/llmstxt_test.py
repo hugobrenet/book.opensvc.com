@@ -46,19 +46,28 @@ SUMMARY = """# Summary
   - [DEFAULT](agent.reference.keywords/svc/DEFAULT.md)
 """
 
-PAGES = {
+# BODIES are the pages as written, DESCRIPTIONS the comment each page written
+# by hand opens on, PAGES the two together, as mdbook renders them.
+BODIES = {
     "preamble/introduction.md": "# Introduction\n\nOpenSVC is an open-source software product.\n",
-    "agent/install.md": "# Install\n\n## Branch\n\nWe feed packages in 3 different branches:\n\n* `dev` is unstable.\n\n"
-    "  Every candidate Pull Request causes a new package.\n\nThe packages are signed by the OpenSVC key.\n",
+    "agent/install.md": "# Install\n\n## Branch\n\nWe feed packages in 3 different branches:\n\n* `dev` is unstable.\n",
     "agent/configure.md": "# Configure\n\nThe agent uses `ini` configuration files.\n",
-    "agent/configure.base.md": "# Node\n\n| Env | Behaves As |\n|---|---|\n| PRD | production |\n\n"
-    "\tsudo om cluster config update --set node.env=PRD\n\nThe agent executes periodic tasks.\n",
+    "agent/configure.base.md": "# Node\n\n\tsudo om cluster config update --set node.env=PRD\n",
     "agent/configure.quorum.md": '# Cluster Quorum\n\n<i class="fa-solid fa-server" style="color:cornflowerblue"></i>'
     "When a peer is flagged as stale by all heartbeats, the daemon assumes a split-brain.\n",
     "ai/install.md": "# Install the assistant\n\nThe assistant runs in containers of one service.\n",
     "agent.reference.keywords/svc/SUMMARY.md": "# svc\n\n- [DEFAULT](DEFAULT.md)\n",
     "agent.reference.keywords/svc/DEFAULT.md": "# Section `DEFAULT`\n\n\t[DEFAULT]\n\tnodes = n1\n",
 }
+DESCRIPTIONS = {
+    "preamble/introduction.md": "What OpenSVC is, why use it, and what it requires.",
+    "agent/install.md": "How to install the agent\n   packages, by distribution.",
+    "agent/configure.md": "The syntax of the agent configuration files.",
+    "agent/configure.base.md": "The node configuration: its environment and the schedules of its jobs.",
+    "agent/configure.quorum.md": "Cluster quorum: enabling it, and how nodes and arbitrators vote on a split-brain.",
+    "ai/install.md": "How to install the assistant.",
+}
+PAGES = {path: (f"<!-- llms: {DESCRIPTIONS[path]} -->\n" if path in DESCRIPTIONS else "") + body for path, body in BODIES.items()}
 
 
 class Book:
@@ -132,50 +141,22 @@ class ChaptersTest(unittest.TestCase):
 
 
 class NoteTest(unittest.TestCase):
-    def test_the_first_sentence_that_stands_alone(self):
-        for path, text, want in [
-            ("agent/install.md", PAGES["agent/install.md"], "The packages are signed by the OpenSVC key."),
-            ("agent/configure.base.md", PAGES["agent/configure.base.md"], "The agent executes periodic tasks."),
-            ("x.md", "# X\n\nUse the syntax `om <selector> <action>` to act on objects. Then more.\n",
-             "Use the syntax `om <selector> <action>` to act on objects."),
-            ("x.md", "# X\n\nRead the [status](status.md), e.g. with om mon, before acting. Then more.\n",
-             "Read the status, e.g. with om mon, before acting."),
-            ("x.md", "# X\n\n🛈 Newly installed daemons are not enabled by default.\n",
-             "Newly installed daemons are not enabled by default."),
-            # A table may have no pipe at the margin.
-            ("x.md", "# X\n\nEnv      | Behaves As | Description\n---      | ---        | ---\nPRD      | production | The default\n\n"
-             "The agent executes periodic tasks.\n", "The agent executes periodic tasks."),
-        ]:
-            self.assertEqual(llmstxt.note(path, text), want, path)
-
-    def test_a_sentence_leaning_on_what_comes_before_is_no_note(self):
-        for text, want in [
-            ("# X\n\nIn this case the pool drivers do it.\n\nPools give volumes their disks.\n", "Pools give volumes their disks."),
-            ("# X\n\nIt is started by the daemon. The daemon starts it at boot.\n", "The daemon starts it at boot."),
-            ("# X\n\nThis is done once. This page takes about five minutes.\n", "This page takes about five minutes."),
-        ]:
-            self.assertEqual(llmstxt.note("x.md", text), want, text)
-
     def test_the_description_a_page_gives_of_itself(self):
-        text = "<!-- llms: How to install the agent\n   packages, by distribution. -->\n# Install\n\nThe packages are signed.\n"
-        self.assertEqual(llmstxt.note("agent/install.md", text), "How to install the agent packages, by distribution.")
-        self.assertEqual(llmstxt.note("agent.reference.keywords/svc/DEFAULT.md", "<!-- llms: The DEFAULT section. -->\n"), "The DEFAULT section.")
+        self.assertEqual(llmstxt.note("agent/install.md", PAGES["agent/install.md"]), "How to install the agent packages, by distribution.")
 
-    def test_no_note_rather_than_one_that_says_nothing(self):
-        for text in ["# X\n\nThe chapter follows that order:\n\n* one\n", "# X\n\n```\n=> node does not have quorum\n```\n",
-                     "# X\n\n=> node does not have quorum, commits suicide\n", "# X\n\nKVM Live Migration\n"]:
+    def test_nothing_is_guessed_from_the_text(self):
+        for text in [BODIES["preamble/introduction.md"], "# X\n\nA sentence that would make a fine description.\n", "<!-- llms:  -->\n# X\n"]:
             self.assertIsNone(llmstxt.note("x.md", text), text)
-
-    def test_a_long_sentence_is_cut_on_a_word(self):
-        got = llmstxt.note("x.md", "# X\n\n" + "word " * 100 + "end.\n")
-        self.assertLessEqual(len(got), llmstxt.MAX_NOTE)
-        self.assertTrue(got.endswith("word…"))
 
     def test_the_keyword_reference_says_what_section_a_page_documents(self):
         self.assertEqual(llmstxt.note("agent.reference.keywords/node/hb.relay.md", "\t[hb#1]\n"),
                          "The keywords of the `hb.relay` sections of the node configuration.")
         self.assertEqual(llmstxt.note("agent.reference.keywords/svc/SUMMARY.md", ""),
                          "The sections of the svc configuration, each with its keywords.")
+        self.assertEqual(llmstxt.note("agent.reference.keywords/changes.md", "# Keyword changes\n"),
+                         "What each release of the agent added, removed and changed in the keywords.")
+        self.assertEqual(llmstxt.note("agent.reference.keywords/removed.md", "# Removed keywords\n"),
+                         "The keywords the agent no longer has, and the release that removed each.")
 
 
 class KeywordReleaseTest(unittest.TestCase):
@@ -203,21 +184,23 @@ class MainTest(unittest.TestCase):
         self.assertTrue(index.startswith(
             "# OpenSVC\n\n> Documents the purpose and usage of the OpenSVC infrastructure tools.\n\n"
             "Build: abc1234 2026-11-02.\n\nKeyword reference: OpenSVC agent v3.0.0-rc56.\n\n## OpenSVC\n\n"
-            "- [Introduction](preamble/introduction.md): OpenSVC is an open-source software product.\n"), index)
-        self.assertIn("## Agent\n\n- [Agent > Install](agent/install.md): The packages are signed by the OpenSVC key.\n", index)
-        self.assertIn("- [Configure > Cluster Quorum](agent/configure.quorum.md): When a peer", index)
-        self.assertIn("## AI Assistant\n\n- [AI Assistant > Install](ai/install.md)", index)
+            "- [Introduction](preamble/introduction.md): What OpenSVC is, why use it, and what it requires.\n"), index)
+        self.assertIn("## Agent\n\n- [Agent > Install](agent/install.md): How to install the agent packages, by distribution.\n", index)
+        self.assertIn("- [Configure > Cluster Quorum](agent/configure.quorum.md): Cluster quorum: enabling it", index)
+        self.assertIn("## AI Assistant\n\n- [AI Assistant > Install](ai/install.md): How to install the assistant.\n", index)
         # The keyword reference is the optional section, the last: the summary
         # of each kind, not the sections it lists, published all the same.
         optional = index.split("## Optional\n\n")[1]
         self.assertEqual(optional, "- [svc](agent.reference.keywords/svc/SUMMARY.md): The sections of the svc configuration, each with its keywords.\n")
         self.assertTrue(os.path.isfile(os.path.join(book.out, "agent.reference.keywords/svc/DEFAULT.md")))
 
-        # Every page is laid next to its html page, the icons removed; the home
-        # page is the first chapter, and the page of a missing URL its own.
+        # Every page is laid next to its html page, its description comment
+        # and its icons removed; the home page is the first chapter, and the
+        # page of a missing URL its own.
         self.assertEqual(book.read("agent/configure.quorum.md"),
                          "# Cluster Quorum\n\nWhen a peer is flagged as stale by all heartbeats, the daemon assumes a split-brain.\n")
-        self.assertEqual(book.read("index.md"), PAGES["preamble/introduction.md"])
+        self.assertEqual(book.read("agent/install.md"), BODIES["agent/install.md"])
+        self.assertEqual(book.read("index.md"), BODIES["preamble/introduction.md"])
         self.assertEqual(book.read("404.md"), "# Document not found (404)\n")
         for path in PAGES:
             self.assertTrue(os.path.isfile(os.path.join(book.out, path)), path)
@@ -225,17 +208,24 @@ class MainTest(unittest.TestCase):
         full = book.read("llms-full.txt")
         self.assertTrue(full.startswith("Keyword reference: OpenSVC agent v3.0.0-rc56.\n\n<!-- preamble/introduction.md -->\n\n# Introduction"), full[:120])
         self.assertIn("<!-- ai/install.md -->", full)
+        self.assertNotIn("llms:", full)
         self.assertNotIn("agent.reference.keywords/svc/DEFAULT.md", full)
 
-    def test_the_description_comment_is_not_published(self):
+    def test_a_page_with_no_description_fails_and_writes_nothing(self):
         pages = dict(PAGES)
-        pages["agent/install.md"] = "<!-- llms: How to install the agent packages. -->\n" + PAGES["agent/install.md"]
+        pages["agent/configure.md"] = BODIES["agent/configure.md"]
         book = Book(pages)
         self.addCleanup(book.close)
-        self.assertEqual(book.run(), 0)
-        self.assertIn("- [Agent > Install](agent/install.md): How to install the agent packages.\n", book.read("llms.txt"))
-        self.assertEqual(book.read("agent/install.md"), PAGES["agent/install.md"])
-        self.assertNotIn("llms:", book.read("llms-full.txt"))
+        self.assertEqual(book.run("--keywords-index", book.index), 1)
+        self.assertEqual(os.listdir(book.out), [])
+
+    def test_a_description_longer_than_a_line_fails(self):
+        pages = dict(PAGES)
+        pages["agent/configure.md"] = f"<!-- llms: {'word ' * 50}-->\n" + BODIES["agent/configure.md"]
+        book = Book(pages)
+        self.addCleanup(book.close)
+        self.assertEqual(book.run("--keywords-index", book.index), 1)
+        self.assertEqual(os.listdir(book.out), [])
 
     def test_a_book_with_no_keyword_index_names_no_release(self):
         book = Book()
