@@ -247,3 +247,145 @@
     init();
   }
 })();
+
+// Sidebar head.
+//
+// The logo of OpenSVC at the top left, the release picker next to it, and
+// under them the search, as a field: it opens the search of the book, which
+// the menu bar then shows only while the sidebar is hidden. The head is built
+// here, not in the theme, for the book to keep the page template of the
+// mdbook version that builds it.
+(function () {
+  var sidebar = document.querySelector("nav.sidebar");
+  var scrollbox = sidebar && sidebar.querySelector(".sidebar-scrollbox");
+  if (!scrollbox) {
+    return;
+  }
+  var root = typeof path_to_root === "undefined" ? "" : path_to_root;
+
+  var head = document.createElement("div");
+  head.className = "sidebar-head";
+
+  var top = document.createElement("div");
+  top.className = "sidebar-brand";
+  var home = document.createElement("a");
+  home.className = "sidebar-home";
+  home.href = root + "index.html";
+  var logo = document.createElement("img");
+  logo.src = root + "images/opensvc-logo.svg";
+  logo.alt = "";
+  var name = document.createElement("span");
+  name.textContent = "OpenSVC";
+  home.appendChild(logo);
+  home.appendChild(name);
+  var versions = document.createElement("span");
+  versions.className = "sidebar-versions";
+  top.appendChild(home);
+  top.appendChild(versions);
+
+  var search = document.createElement("button");
+  search.type = "button";
+  search.className = "sidebar-search";
+  search.setAttribute("aria-label", "Search the book");
+  search.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/>' +
+    '<line x1="10.2" y1="10.2" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>' +
+    "<span>Search…</span><kbd>S</kbd>";
+  search.addEventListener("click", function () {
+    var toggle = document.getElementById("mdbook-search-toggle") || document.getElementById("search-toggle");
+    var wrapper = document.getElementById("mdbook-search-wrapper") || document.getElementById("search-wrapper");
+    var field = document.getElementById("mdbook-searchbar") || document.getElementById("searchbar");
+    if (!toggle) {
+      return;
+    }
+    if (wrapper && !wrapper.classList.contains("hidden")) {
+      if (field) {
+        field.focus();
+      }
+      return;
+    }
+    toggle.click();
+  });
+
+  head.appendChild(top);
+  head.appendChild(search);
+  sections(head);
+  sidebar.insertBefore(head, scrollbox);
+  sidebar.classList.add("sidebar-with-head");
+
+  // The sidebar shows one of two sections, the documentation or the keyword
+  // reference, its part of the summary: picked under the search, and set
+  // by the page read. Picking the other opens its first page.
+  function sections(head) {
+    var chapters = scrollbox.querySelector("ol.chapter");
+    var items = chapters ? Array.prototype.slice.call(chapters.children) : [];
+    var start = -1;
+    items.forEach(function (item, i) {
+      if (start < 0 && item.classList.contains("part-title") && /^\s*Agent Keywords Reference\b/.test(item.textContent)) {
+        start = i;
+      }
+    });
+    if (start < 0) {
+      return;
+    }
+    var keywords = items.slice(start);
+    var documentation = items.slice(0, start);
+    var first = keywords.map(function (item) { return item.querySelector("a[href]"); }).filter(Boolean)[0];
+    var current = /\/agent\.reference\.keywords\//.test(window.location.pathname) ? "keywords" : "documentation";
+
+    var picker = document.createElement("span");
+    picker.className = "sidebar-section";
+    var select = document.createElement("select");
+    select.setAttribute("aria-label", "sidebar section");
+    [["documentation", "Documentation"], ["keywords", "Keywords"]].forEach(function (choice) {
+      var option = document.createElement("option");
+      option.value = choice[0];
+      option.textContent = choice[1];
+      option.selected = choice[0] === current;
+      select.appendChild(option);
+    });
+    select.addEventListener("change", function () {
+      if (this.value === "keywords") {
+        if (first) {
+          window.location.href = first.href;
+        }
+      } else {
+        window.location.href = root + "index.html";
+      }
+    });
+    picker.appendChild(select);
+    head.appendChild(picker);
+    sidebar.classList.add("sidebar-with-sections");
+
+    (current === "keywords" ? documentation : keywords).forEach(function (item) {
+      item.classList.add("sidebar-section-hidden");
+    });
+  }
+
+  // The theme button and its menu move next to the release picker while the
+  // sidebar shows, and back to the menu bar while it is hidden. Moved, not
+  // copied: the book script keeps its listeners on them.
+  var toggle = document.getElementById("mdbook-theme-toggle") || document.getElementById("theme-toggle");
+  var list = document.getElementById("mdbook-theme-list") || document.getElementById("theme-list");
+  if (!toggle || !list) {
+    return;
+  }
+  var slot = document.createElement("span");
+  slot.className = "sidebar-theme";
+  top.appendChild(slot);
+  var anchor = document.createComment("theme");
+  toggle.parentNode.insertBefore(anchor, toggle);
+  var html = document.documentElement;
+  function place() {
+    if (html.classList.contains("sidebar-visible")) {
+      if (toggle.parentNode !== slot) {
+        slot.appendChild(toggle);
+        slot.appendChild(list);
+      }
+    } else if (toggle.parentNode === slot) {
+      anchor.parentNode.insertBefore(list, anchor.nextSibling);
+      anchor.parentNode.insertBefore(toggle, anchor.nextSibling);
+    }
+  }
+  place();
+  new MutationObserver(place).observe(html, { attributes: true, attributeFilter: ["class"] });
+})();

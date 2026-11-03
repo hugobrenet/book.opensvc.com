@@ -22,8 +22,11 @@ pages. The print page, the whole book, has llms-full.txt for markdown.
 // come after it.
 (function () {
   function build(versions) {
+    // The picker sits next to the logo, at the head of the sidebar the
+    // theme script builds, else in the menu bar.
+    var place = document.querySelector(".sidebar-versions");
     var bar = document.getElementById("menu-bar") || document.getElementById("mdbook-menu-bar");
-    if (!bar || !versions || !versions.length) {
+    if (!place && !bar || !versions || !versions.length) {
       return;
     }
     // A version is {"name": "v3.1", "path": "/"} or {"name": "v3.0", "path":
@@ -41,7 +44,6 @@ pages. The print page, the whole book, has llms-full.txt for markdown.
       return;
     }
     var rest = page.slice(current.path.length);
-    var buttons = bar.querySelector(".right-buttons") || bar;
     var select = document.createElement("select");
     select.className = "version-picker";
     select.setAttribute("aria-label", "documentation version");
@@ -58,7 +60,7 @@ pages. The print page, the whole book, has llms-full.txt for markdown.
       // exactly what a reader switches versions to check.
       window.location.href = this.value + rest;
     });
-    buttons.appendChild(select);
+    (place || bar.querySelector(".right-buttons") || bar).appendChild(select);
   }
 
   window.addEventListener("DOMContentLoaded", function () {
