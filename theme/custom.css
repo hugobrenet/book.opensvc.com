@@ -299,6 +299,37 @@
     top: calc(100% + 6px);
 }
 
+.sidebar-git,
+.sidebar-git:link,
+.sidebar-git:visited {
+    color: var(--icons);
+    display: inline-flex;
+    text-decoration: none;
+}
+
+.sidebar-git svg {
+    height: 1.1em;
+    width: 1.1em;
+}
+
+.sidebar-brand .sidebar-git {
+    color: var(--sidebar-fg);
+    opacity: 0.7;
+    padding: 4px 6px;
+}
+
+.sidebar-brand .sidebar-git:hover {
+    color: var(--sidebar-active);
+    opacity: 1;
+}
+
+#menu-bar .sidebar-git,
+#mdbook-menu-bar .sidebar-git {
+    align-items: center;
+    height: var(--menu-bar-height);
+    padding: 0 8px;
+}
+
 /* The section of the summary the sidebar shows. */
 .sidebar-section {
     display: block;
