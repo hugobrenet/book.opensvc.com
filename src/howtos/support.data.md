@@ -1,3 +1,4 @@
+<!-- llms: The data support asks for: the description of the issue, the node and cluster configuration, and logs, with how to keep them across reboots. -->
 # Support Data Collection
 
 To ease resolution, you will be asked to provide **information**, configuration, and log files related to the encountered issue.

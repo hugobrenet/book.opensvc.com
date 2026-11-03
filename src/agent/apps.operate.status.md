@@ -1,3 +1,4 @@
+<!-- llms: How to read the state of the cluster and its services: om mon and its status and alert markers, the machine-readable outputs, and the ox terminal UI. -->
 # Services Status
 
 > The **API** tabs assume the `$TOKEN` and the listener endpoint set up in

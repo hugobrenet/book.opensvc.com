@@ -1,3 +1,4 @@
+<!-- llms: An ingress gateway, an haproxy service exposing outside the cluster the services of a backend network: its topologies, certificate, configuration and deployment. -->
 # Ingress Gateway
 
 Services obtaining their IP address from a backend network are not reachable

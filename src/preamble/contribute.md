@@ -1,3 +1,4 @@
+<!-- llms: How to contribute to OpenSVC and to this book: clone and build the projects, install mdbook, and generate the documentation. -->
 # Contribute
 
 OpenSVC projects, including this documentation, are hosted on GitHub.

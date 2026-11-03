@@ -1,3 +1,4 @@
+<!-- llms: The ox client, which manages clusters through their API from another host: its contexts, login, terminal UI and command line. -->
 # Cluster API Client
 
 The `ox` program uses only the agent API and mirrors the `om` commandset, which makes it suitable for managing one or more clusters from a tiers linux box.

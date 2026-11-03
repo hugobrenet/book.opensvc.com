@@ -1,3 +1,4 @@
+<!-- llms: The events of the daemon: the commands reading them, filters, event kinds, the events a task runs on, and templating. -->
 # Events
 
 * The daemon runs an event bus.

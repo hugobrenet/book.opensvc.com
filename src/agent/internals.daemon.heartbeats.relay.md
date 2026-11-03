@@ -1,3 +1,4 @@
+<!-- llms: The hb.relay driver, heartbeats exchanged through a relay agent: its configuration, authentication, requirements, pacing, timeouts and retries. -->
 # hb.relay
 
 This driver implements a heartbeat mechanism by reading and writing on the memory of a dedicated OpenSVC agent relay host.

@@ -1,3 +1,4 @@
+<!-- llms: How to select the objects a command acts on: all objects, all services, one path, a list of paths or a pattern. -->
 # Select Objects
 
 Commands use the `om <selector> <action>` syntax to operate on a selection of objects.

@@ -1,3 +1,4 @@
+<!-- llms: Deploying applications: the life of the configuration of an object, from the name it is given to the day it is removed. -->
 # Deploy Apps
 
 Applications are composed of one or more objects (services, configs, secrets,

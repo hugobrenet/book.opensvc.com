@@ -1,3 +1,4 @@
+<!-- llms: The roles of the users of the cluster API, per namespace, guest, operator and admin, and cluster-wide, such as root, and what each allows. -->
 # Role-Based Access Control
 
 A cluster reached over its API requires authentication, and every request is

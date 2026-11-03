@@ -1,3 +1,4 @@
+<!-- llms: The three ids naming what the agent does, session, execution and orchestration: which one to ask with, and where they are recorded. -->
 # Session, Execution and Orchestration Ids
 
 Three identifiers name what the agent is doing, at three different scales.

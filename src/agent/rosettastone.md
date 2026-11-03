@@ -1,3 +1,4 @@
+<!-- llms: Tables mapping the commands of other clusterwares and orchestrators to their OpenSVC equivalents. -->
 # Rosetta Stone
 
 If you are coming from another clusterware or orchestrator, these tables map
