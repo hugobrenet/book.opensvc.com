@@ -52,6 +52,64 @@ The agent listener supports several industry-standard authentication methods to 
   * **Issuance:** A token is obtained from the `POST /api/auth/token` endpoint, which accepts only the requests authenticated by the **unix socket** (a local `om` command) or by **Basic Authentication**. A request authenticated by a token or by a certificate is refused with `403 not allowed to create token`. A remote client therefore presents its password once to obtain a token, and asks for a refresh token at the same time if it needs to renew without presenting the password again.
   * **Availability:** This method was **added in OpenSVC v3** agents.
 
+### Local Accounts and Sidecars (User Socket)
+
+  * **Mechanism:** A process of the node connects to the **user socket**, `/run/opensvc-ux/http.sock`, and presents no credential: the daemon reads who connected from the connection, as the kernel recorded it, which the process can not choose. `ox` uses this socket when it runs as a user other than root with no context set.
+  * **Access:** The socket is mode `0660`, in a directory of mode `0750`, both owned by root and the group the `listener.ux_owner_group` keyword names, `opensvc` by default. A node that does not know the group serves no socket, and logs why.
+  * **Local accounts:** The grants are the union of the `grant` keyword of the `[uxgroup#<group>]` sections of the cluster configuration naming the unix groups of the account, as the name service lists them, and of the `grant` keyword of the `system/usr/<name>` object whose `uxuser` keyword names the login or the uid of the account. A `usr` object without `uxuser` is no local account, even one of the same name.
+  * **Sidecars:** A process of a container started by the agent, the socket bind mounted into it, gets the grants of the `uxgrant` keyword of its container resource. The container is told by its cgroup, under the process group of the resource, never by its uid: root in a container is root on the cluster only if `uxgrant = root` says so. This needs a kernel giving the pidfd of the peer of a unix socket (Linux 6.5 and later).
+  * **Root:** Root is **not** root on the user socket: a local `om` command uses the root socket.
+  * **Writes:** Setting `uxuser`, a `[uxgroup#<group>]` section, or `uxgrant` requires the root grant.
+  * **Name service:** The login and the groups of an account are looked up with a deadline of 3 seconds, at most 8 lookups at once, and cached. A directory server not answering refuses the accounts it is asked about, never the root socket nor the sidecars, and a `uxuser` naming a uid keeps working without the name service.
+  * **Availability:** This method was **added in OpenSVC v3** agents.
+
+Grant the members of the `ops` unix group the operator role on the `ns1` namespace:
+
+<div class="tabs">
+<div class="tab" data-title="CLI">
+
+```
+om cluster config update --set uxgroup#ops.grant=operator:ns1
+```
+
+</div>
+<div class="tab" data-title="API">
+
+```
+curl -s -X PATCH -H "Authorization: Bearer $TOKEN" \
+  --data-urlencode 'set=uxgroup#ops.grant=operator:ns1' \
+  -G "https://<node>:1215/api/cluster/config"
+```
+
+</div>
+</div>
+
+Let a sidecar act as root, the socket directory bind mounted into its container:
+
+<div class="tabs">
+<div class="tab" data-title="CLI">
+
+```
+om ns1/svc/app config update \
+  --set container#sidecar.volume_mounts=/run/opensvc-ux:/run/opensvc-ux:ro \
+  --set container#sidecar.uxgrant=root
+```
+
+</div>
+<div class="tab" data-title="API">
+
+```
+curl -s -X PATCH -H "Authorization: Bearer $TOKEN" \
+  --data-urlencode 'set=container#sidecar.volume_mounts=/run/opensvc-ux:/run/opensvc-ux:ro' \
+  --data-urlencode 'set=container#sidecar.uxgrant=root' \
+  -G "https://<node>:1215/api/object/path/ns1/svc/app/config"
+```
+
+</div>
+</div>
+
+> **Note:** A `sudo` rule letting a user run `om` is a root grant, whatever arguments the rule allows: om runs commands as root by design, as the start command of an app, the editor of `om <path> config edit`, or a task. Give the user a group mapped by a `[uxgroup#<group>]` section, and `ox`, instead.
+
 
 ## Managing API Users
 
