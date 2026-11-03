@@ -94,3 +94,58 @@
         padding: 0 5px;
     }
 }
+
+/* The page of a missing URL: what was asked, and the ways out of it. */
+.not-found {
+    margin: 4em auto 2em auto;
+    max-width: 36em;
+    text-align: center;
+}
+
+.not-found-code {
+    background: linear-gradient(135deg, var(--links), var(--fg));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: clamp(6em, 22vw, 10em);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    margin: 0;
+    opacity: 0.85;
+}
+
+.not-found h1 {
+    margin-top: 0.3em;
+}
+
+.not-found h1 a.header {
+    pointer-events: none;
+}
+
+.not-found-path code {
+    word-break: break-all;
+}
+
+.not-found-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8em;
+    justify-content: center;
+    margin-top: 2em;
+}
+
+.content .not-found-button {
+    border: 1px solid var(--links);
+    border-radius: 5px;
+    color: var(--links);
+    padding: 0.5em 1.2em;
+    text-decoration: none;
+}
+
+.content .not-found-button:hover,
+.content .not-found-button.not-found-primary {
+    background: var(--links);
+    color: var(--bg);
+    text-decoration: none;
+}

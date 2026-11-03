@@ -191,3 +191,59 @@
     init();
   }
 })();
+
+// The page of a missing URL names the path asked, offers to search the book
+// for its words, and points to the page of the same name under agent/ when
+// there is one: most missing URLs are pages of the agent asked at the root,
+// where the book had them before v3.
+(function () {
+  function init() {
+    var box = document.querySelector(".not-found");
+    if (!box) {
+      return;
+    }
+    var path = window.location.pathname;
+    var heading = box.querySelector("h1");
+    var asked = document.createElement("p");
+    asked.className = "not-found-path";
+    asked.appendChild(document.createTextNode("No page at "));
+    var code = document.createElement("code");
+    code.textContent = path;
+    asked.appendChild(code);
+    asked.appendChild(document.createTextNode("."));
+    heading.parentNode.insertBefore(asked, heading.nextSibling);
+
+    var name = path.split("/").pop().replace(/\.(html|md)$/, "");
+    var words = name.split(/[._-]+/).filter(function (word) {
+      return word && word !== "index" && !/^v?\d+$/.test(word);
+    }).join(" ");
+    var search = box.querySelector(".not-found-search");
+    if (search && words) {
+      search.href = "index.html?search=" + encodeURIComponent(words);
+      search.textContent = "Search the book for “" + words + "”";
+    }
+
+    if (!name || /^\/(v[^/]+\/)?agent\//.test(path)) {
+      return;
+    }
+    var version = (path.match(/^\/v[^/]+\//) || ["/"])[0];
+    var candidate = version + "agent/" + name + ".html";
+    fetch(candidate, { method: "HEAD" }).then(function (r) {
+      if (!r.ok) {
+        return;
+      }
+      var link = document.createElement("a");
+      link.className = "not-found-button not-found-primary";
+      link.href = candidate;
+      link.textContent = "Go to " + candidate;
+      var actions = box.querySelector(".not-found-actions");
+      actions.insertBefore(link, actions.firstChild);
+    }).catch(function () { /* no hint */ });
+  }
+
+  if (document.readyState === "loading") {
+    window.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
