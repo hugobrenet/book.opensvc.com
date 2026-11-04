@@ -251,6 +251,7 @@ The agent does not interpret the value.
 
 	required:    false
 	scopable:    true
+	deprecated:  since v3.0.0-rc57, replaced by environment
 	convert:     shlex
 
 **Example:**
@@ -446,10 +447,28 @@ The entrypoint args must be set in `command`.
 
 **Description:**
 
-A whitespace-separated list of `<var>=<value>`.
+A whitespace-separated list of variables: `<var>=<value>`, or
+`<var> from <path> key <key>` to read the value from the key of a sec or a cfg.
 
 A shell expression splitter is applied, so double quotes can be around
 `<value>` only or whole `<var>=<value>`.
+
+The path of a datastore is the one of an install line: `./sec/oc3` is the sec
+named oc3 in the namespace of the object, `other/cfg/oc3` a cfg of another
+namespace, which has to allow it. A variable read from a sec is a secret.
+
+A `*` in `<var>` stands for the key, and a key pattern names a variable per key
+matching: `* from ./sec/oc3 key db_*` sets a variable named after each key
+starting with db_, and `OC3_* from ./cfg/oc3 key *` one per key, prefixed with
+OC3_.
+
+Example:
+
+	environment = SLIP=slob
+	    OC3_DB_PASSWORD from ./sec/oc3 key db_password
+	    OC3_FOO from ./cfg/oc3 key bar
+
+A datastore or a key not existing is logged, and the variable not set.
 
 
 ## Keyword `guest_os`
@@ -1504,6 +1523,7 @@ written concurrently from all nodes.
 
 	required:    false
 	scopable:    true
+	deprecated:  since v3.0.0-rc57, replaced by environment
 	convert:     shlex
 
 **Example:**
@@ -1749,7 +1769,7 @@ Allocate a pseudo-tty.
 
 	required:    false
 	scopable:    false
-	rbac:        Requires the root grant, except for the values oci, docker, podman.
+	rbac:        Requires the root grant, except for the values oci, docker, podman, kvm.
 
 **Description:**
 

@@ -1094,7 +1094,7 @@ Some tags can influence the driver behaviour:
 
 	required:    false
 	scopable:    false
-	rbac:        Requires the root grant, except for the values oci, docker, podman.
+	rbac:        Requires the root grant, except for the values oci, docker, podman, kvm.
 
 **Description:**
 

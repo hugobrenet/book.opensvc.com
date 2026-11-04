@@ -11,11 +11,13 @@
 - openid_client_id
 - openid_issuer
 - port
+- public_metrics
 - throttle_burst
 - throttle_expires
 - throttle_rate
 - tls_secs
 - ux_owner_group
+- vsock_port
 
 ## Keyword `acme_port`
 
@@ -179,6 +181,28 @@ there are actions to unqueue. The opensvc daemon executes the
 The `listener.port` value is sent to the collector on `om node push asset`.
 
 
+## Keyword `public_metrics`
+
+	required:    false
+	scopable:    false
+	default:     false
+	convert:     bool
+	rbac:        This driver group requires the root grant.
+
+**Description:**
+
+Serve `/metrics` with no authentication, for a prometheus scraping with no
+credential. The page holds the aggregates of the node: the counts of its
+objects and the state of its daemon, not the names of the objects.
+
+By default a scrape needs the `scraper` or `root` grant. The detail pages,
+`/metrics/<subsystem>`, need it whatever this keyword says, as they name the
+objects. The `/api/node/name/<node>/metrics` routes are not concerned: they
+always authenticate, and filter what they serve by the grants of the caller.
+
+Takes effect at once, with no daemon restart.
+
+
 ## Keyword `throttle_burst`
 
 	required:    false
@@ -281,5 +305,36 @@ served from the next daemon start.
 
 The root user of the node is not root through this socket: it uses the
 root socket.
+
+
+## Keyword `vsock_port`
+
+	required:    false
+	scopable:    false
+	since:       v3.0.0-rc56
+	convert:     int
+	rbac:        This driver group requires the root grant.
+
+**Example:**
+
+	vsock_port=1215
+
+**Description:**
+
+The vsock port the daemon of a guest serves the api on, for the daemon of its
+hypervisor to reach it with no network, none when zero.
+
+Set it on a guest only: the guest needs a vsock device, and answers the
+hypervisor alone. A connection from a reserved source port holding a token of
+the key the firmware of the guest names is granted `root`, as the hypervisor is
+root on its guests anyway: the `vsock_port` keyword of the `container.kvm`
+resource has the key written there, for the guest to read it from its next
+start on. Any other connection of the hypervisor has to authenticate, and the
+other guests are dropped.
+
+The next port serves the console endpoint the same way, for `container enter`
+from the hypervisor, to a privileged process of the hypervisor alone.
+
+Takes effect at the next daemon start.
 
 

@@ -1,7 +1,170 @@
 # Keyword changes
 
-What each release of the agent added, removed and changed in its keywords. The reference itself documents v3.0.0-rc56.
+What each release of the agent added, removed and changed in its keywords. The reference itself documents v3.0.0-rc57.
 
+
+## v3.0.0-rc57
+
+
+### Added
+
+- `cluster/listener.public_metrics`
+- `cluster/listener.vsock_port`
+- `cluster/node.allowed_cidrs`
+- `cluster/node.allowed_urls`
+- `cluster/pool.loop.fs_type`
+- `node/listener.public_metrics`
+- `node/listener.vsock_port`
+- `node/node.allowed_cidrs`
+- `node/node.allowed_urls`
+- `node/pool.loop.fs_type`
+- `svc/container.kvm.bridge`
+- `svc/container.kvm.cdrom`
+- `svc/container.kvm.cloud_init`
+- `svc/container.kvm.disk`
+- `svc/container.kvm.image`
+- `svc/container.kvm.memory`
+- `svc/container.kvm.network`
+- `svc/container.kvm.network_filter`
+- `svc/container.kvm.osinfo`
+- `svc/container.kvm.vcpus`
+- `svc/container.kvm.virtinst_args`
+- `svc/container.kvm.vsock_port`
+
+### Changed
+
+- `cluster/network.lan.dev`
+  - description rewritten
+- `cluster/pool.dorado.fs_type`
+  - types: dorado, drbd, freenas, hoc, loop, pure, rados, symmetrix, truenas, vg -> dorado, drbd, freenas, hoc, pure, rados, symmetrix, truenas, vg
+- `cluster/pool.type`
+  - default: directory -> loop
+  - description rewritten
+- `node/network.lan.dev`
+  - description rewritten
+- `node/pool.dorado.fs_type`
+  - types: dorado, drbd, freenas, hoc, loop, pure, rados, symmetrix, truenas, vg -> dorado, drbd, freenas, hoc, pure, rados, symmetrix, truenas, vg
+- `node/pool.type`
+  - default: directory -> loop
+  - description rewritten
+- `svc/app.forking.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/app.forking.environment`
+  - description rewritten
+- `svc/app.forking.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/app.simple.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/app.simple.environment`
+  - description rewritten
+- `svc/app.simple.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/container.docker.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/container.docker.environment`
+  - description rewritten
+- `svc/container.docker.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/container.kvm.name`
+  - required: true -> unset
+- `svc/container.kvm.virtinst`
+  - description rewritten
+- `svc/container.lxc.create_configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> create_environment
+- `svc/container.lxc.create_environment`
+  - description rewritten
+- `svc/container.lxc.create_secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> create_environment
+- `svc/container.oci.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/container.oci.environment`
+  - description rewritten
+- `svc/container.oci.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/container.podman.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/container.podman.environment`
+  - description rewritten
+- `svc/container.podman.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/task.docker.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/task.docker.environment`
+  - description rewritten
+- `svc/task.docker.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/task.host.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/task.host.environment`
+  - description rewritten
+- `svc/task.host.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/task.oci.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/task.oci.environment`
+  - description rewritten
+- `svc/task.oci.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/task.podman.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `svc/task.podman.environment`
+  - description rewritten
+- `svc/task.podman.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `usr/DEFAULT.grant`
+  - description rewritten
+- `vol/task.docker.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `vol/task.docker.environment`
+  - description rewritten
+- `vol/task.docker.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `vol/task.host.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `vol/task.host.environment`
+  - description rewritten
+- `vol/task.host.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `vol/task.oci.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `vol/task.oci.environment`
+  - description rewritten
+- `vol/task.oci.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `vol/task.podman.configs_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
+- `vol/task.podman.environment`
+  - description rewritten
+- `vol/task.podman.secrets_environment`
+  - deprecated: unset -> v3.0.0-rc57
+  - replacedBy: unset -> environment
 
 ## v3.0.0-rc56
 

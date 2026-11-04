@@ -141,10 +141,14 @@ The thin pool is made by the sysadmin, as the volume group is:
 	required:    false
 	scopable:    false
 	candidates:  directory, loop, vg, zpool, freenas, share, shm, symmetrix, truenas, virtual, dorado, hoc, drbd, pure, rados
-	default:     directory
+	default:     loop
 
 **Description:**
 
 The pool type.
+
+`loop` by default: the pool serves each volume a file holding a filesystem of its
+size, which bounds what the volume holds. `directory` needs its `quota` keyword to
+do so, and a namespace can not claim a pool that does not.
 
 

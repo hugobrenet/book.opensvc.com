@@ -4,13 +4,10 @@
 
 	[container#1]
 	type = kvm
-	name = 
 
 **Minimal setup command:**
 
-	om test/svc/foo set \
-		--kw="type=kvm" \
-		--kw="name="
+	om test/svc/foo set --kw="type=kvm"
 
 **Supported keywords:**
 
@@ -22,16 +19,25 @@
 - blocking_pre_start
 - blocking_pre_stop
 - blocking_pre_unprovision
+- bridge
+- cdrom
+- cloud_init
 - comment
 - disable
+- disk
 - encap
 - guest_os
 - hostname
+- image
+- memory
 - migrate_timeout
 - monitor
 - name
+- network
+- network_filter
 - no_preempt_abort
 - optional
+- osinfo
 - osvc_root_path
 - pg_blkio_weight
 - pg_cpu_burst
@@ -75,7 +81,10 @@
 - type
 - unprovision
 - unprovision_requires
+- vcpus
 - virtinst
+- virtinst_args
+- vsock_port
 
 ## Keyword `blocking_post_provision`
 
@@ -185,6 +194,73 @@ A command or script to execute before the resource `unprovision` action.
 Errors interrupt the action.
 
 
+## Keyword `bridge`
+
+	required:    false
+	scopable:    false
+	provision:   used only by the provision of the resource
+	convert:     list
+	rbac:        A keyword of the kvm driver, which needs the root grant to choose.
+
+**Example:**
+
+	bridge=br-prd
+
+**Description:**
+
+The host bridges the network interfaces of the guest are plugged into, one
+interface per bridge, as `br-prd`. Read by the provision only.
+
+
+## Keyword `cdrom`
+
+	required:    false
+	scopable:    false
+	provision:   used only by the provision of the resource
+
+**Example:**
+
+	cdrom=https://images.example.com/debian-13-netinst.iso
+
+**Description:**
+
+The installer the guest boots from at its provision, to install on its first
+disk: a file of a volume of the object, as `volume#2:/debian.iso`, a path, or an
+http(s) url, which the node policy on the urls it fetches applies to. The screen
+of the guest, its display, is where it is answered.
+
+An installed system has no cloud-init, so the guest finds its address by dhcp: a
+lan network is refused, and the filter of a network expects it to use an eui-64
+link-local address on an ipv6 network.
+
+The guest stops at the first reboot of the installer, for it to boot the disk from
+then on, and the object is in warn with its volumes up: start its instance, which an
+orchestrated start refuses. An installer stopped before its end is not resumed: the
+definition of the domain no longer has the media, and the guest is to be provisioned
+again.
+
+Read by the provision only. It excludes `image` and `cloud_init`.
+
+
+## Keyword `cloud_init`
+
+	required:    false
+	scopable:    false
+	provision:   used only by the provision of the resource
+
+**Example:**
+
+	cloud_init=from ./cfg/vm1 key user-data
+
+**Description:**
+
+The cloud-init user data of the guest, a key of a cfg or sec object, as
+`from ./cfg/vm1 key user-data`, so a value may be kept secret and shared between
+objects. It is used at the first boot.
+
+Needs a `virt-install` with the `--cloud-init` option.
+
+
 ## Keyword `comment`
 
 	required:    false
@@ -226,6 +302,26 @@ These actions immediately return success.
 
 > **Note**: The `enable` and `disable` actions preserve the individual
   resource `disable` state.
+
+
+## Keyword `disk`
+
+	required:    false
+	scopable:    false
+	provision:   used only by the provision of the resource
+	convert:     list
+
+**Example:**
+
+	disk=disk#1 disk#2
+
+**Description:**
+
+The disks of the guest, the first one being the one it boots: resource ids, as
+`disk#1`, or device paths.
+
+The resources make and move the storage: its size, its pool and its snapshots
+are theirs. Read by the provision only.
 
 
 ## Keyword `encap`
@@ -272,6 +368,47 @@ The name of the operating system in the virtual machine.
 Set the container hostname. If not set, the container `name` is used.
 
 
+## Keyword `image`
+
+	required:    false
+	scopable:    false
+	provision:   used only by the provision of the resource
+	rbac:        An image starting with a '-' requires the root grant.
+
+**Example:**
+
+	image=/srv/images/noble.qcow2
+
+**Description:**
+
+The cloud image the first disk of the guest is made from: a file of a volume of
+the object, as `volume#2:/noble.qcow2`, a path, or an http(s) url, which the node
+policy on the urls it fetches applies to. A qcow2 or raw image with no backing
+file.
+
+The disk may be larger than the image: most cloud images grow into it at their
+first boot. Read by the provision only, which overwrites what the disk holds.
+
+
+## Keyword `memory`
+
+	required:    false
+	scopable:    false
+	provision:   used only by the provision of the resource
+	convert:     size
+
+**Example:**
+
+	memory=2g
+
+**Description:**
+
+The memory of the guest, as `2g`.
+
+Read by the provision only: the definition of the domain is what holds it from
+then on, and changing this keyword changes nothing of a provisioned guest.
+
+
 ## Keyword `migrate_timeout`
 
 	required:    false
@@ -311,7 +448,7 @@ A resource with `monitor=true` will trigger the `monitor_action`
 
 ## Keyword `name`
 
-	required:    true
+	required:    false
 	scopable:    true
 	stop first:  a change is refused while the resource is up
 	rbac:        A container name of the user's choosing requires the root grant: the default name is the object's own.
@@ -319,6 +456,51 @@ A resource with `monitor=true` will trigger the `monitor_action`
 **Description:**
 
 The name to assign to the container.
+
+
+## Keyword `network`
+
+	required:    false
+	scopable:    false
+	convert:     list
+
+**Example:**
+
+	network=backend3 backend5
+
+**Description:**
+
+The om networks the guest is on, one network interface per network, as
+`backend3 backend5`. A network being of one family, a guest of both is on two.
+
+The guest holds an address of each, drawn by om and in the dns of the cluster:
+on a routed_bridge or a bridge network, a dnsmasq of om hands it out by mac at
+each boot, and a new start on another node gets one of that node. On a lan
+network, the address follows the guest, which is told it by cloud-init at its
+first boot, so a lan needs the `image` keyword.
+
+A guest on an om network can not be moved live.
+
+
+## Keyword `network_filter`
+
+	required:    false
+	scopable:    false
+	default:     true
+	convert:     bool
+	rbac:        A keyword of the kvm driver, which needs the root grant to choose.
+
+**Example:**
+
+	network_filter=false
+
+**Description:**
+
+Keep the guest to the mac and the addresses om gave it, whatever it configures:
+without this filter, a guest can take the address of any other on its network.
+The start of a guest is refused on a node with no `nft`.
+
+A guest needs an eui-64 link-local address, which a cloud image is told to use.
 
 
 ## Keyword `no_preempt_abort`
@@ -352,6 +534,24 @@ The status of task and sync resources is always included in the overall status, 
 Resources tagged as `noaction` are considered optional by default.
 
 Dump filesystems are a typical use case for optional=true.
+
+
+## Keyword `osinfo`
+
+	required:    false
+	scopable:    false
+	provision:   used only by the provision of the resource
+
+**Example:**
+
+	osinfo=ubuntu24.04
+
+**Description:**
+
+The os of the guest, as `ubuntu24.04`, which sets the devices libvirt defaults
+to for it. `virt-install --osinfo list` lists the names.
+
+By default, it is detected from the image, or generic.
 
 
 ## Keyword `osvc_root_path`
@@ -1021,7 +1221,6 @@ If states are omitted, `up,stdby up` is used as the default expected states.
 	scopable:    true
 	default:     4m
 	convert:     duration
-	rbac:        A keyword of the kvm driver, which needs the root grant to choose.
 
 **Example:**
 
@@ -1072,7 +1271,6 @@ If states are omitted, `up,stdby up` is used as the default expected states.
 	scopable:    true
 	default:     2m
 	convert:     duration
-	rbac:        A keyword of the kvm driver, which needs the root grant to choose.
 
 **Example:**
 
@@ -1128,7 +1326,7 @@ Some tags can influence the driver behaviour:
 
 	required:    false
 	scopable:    false
-	rbac:        Requires the root grant, except for the values oci, docker, podman.
+	rbac:        Requires the root grant, except for the values oci, docker, podman, kvm.
 
 **Description:**
 
@@ -1173,6 +1371,25 @@ A condition is expressed as `<rid>(<state>,...)`.
 If states are omitted, `up,stdby up` is used as the default expected states.
 
 
+## Keyword `vcpus`
+
+	required:    false
+	scopable:    false
+	provision:   used only by the provision of the resource
+	convert:     int
+
+**Example:**
+
+	vcpus=2
+
+**Description:**
+
+The number of virtual cpus of the guest.
+
+Read by the provision only: the definition of the domain is what holds it from
+then on, and changing this keyword changes nothing of a provisioned guest.
+
+
 ## Keyword `virtinst`
 
 	required:    false
@@ -1188,5 +1405,55 @@ If states are omitted, `up,stdby up` is used as the default expected states.
 **Description:**
 
 The command to use to create the container. Usually a `virt-install` command or a custom script.
+
+It says all of the command, and excludes the keywords describing the guest: `vcpus`, `memory`, `disk`, `bridge`, `network`, `osinfo`, `image`, `cdrom`, `cloud_init` and `virtinst_args`.
+
+With a `vsock_port`, a `virt-install` knowing the option is given `--vsock cid.auto=yes` unless it names a vsock device already.
+
+
+## Keyword `virtinst_args`
+
+	required:    false
+	scopable:    false
+	provision:   used only by the provision of the resource
+	convert:     shlex
+	rbac:        A keyword of the kvm driver, which needs the root grant to choose.
+
+**Example:**
+
+	virtinst_args=--tpm none --boot uefi
+
+**Description:**
+
+More options of the `virt-install` command the other keywords make, for what
+they do not cover, as `--tpm none --boot uefi`.
+
+
+## Keyword `vsock_port`
+
+	required:    false
+	scopable:    true
+	default:     1215
+	convert:     int
+	rbac:        A keyword of the kvm driver, which needs the root grant to choose.
+
+**Description:**
+
+The vsock port the master reaches the guest daemon on, for the status, the
+config and the actions of the encap instances, and the next port for
+`container enter`, with no network. Set to `0` to not use it.
+
+The guest needs a vsock device, as `<vsock model='virtio'><cid auto='yes'/></vsock>`
+in the domain definition, and to serve the port with its `listener.vsock_port`
+keyword. A provision adds the device to a `virtinst` running `virt-install`,
+when it knows `--vsock` and is not given it.
+
+A start writes the public key of the cluster in the firmware of a guest with such
+a device, in the definition, and the daemon of the guest trusts the requests signed with that
+key. A guest gets it at its next start: until then, or after a renewal of the
+key, its daemon refuses these requests, and the other ways are used.
+
+When the guest daemon does not answer on it, the master uses the `qga` or the
+`rcmd` way, so this keyword needs no change when a guest has no device.
 
 

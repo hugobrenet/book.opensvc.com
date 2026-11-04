@@ -3,7 +3,9 @@
 **Supported keywords:**
 
 - allow_envs
+- allowed_cidrs
 - allowed_networks
+- allowed_urls
 - asset_env
 - branch
 - collector
@@ -67,6 +69,26 @@ When set, the node runs the objects of these envs only, whatever its own env.
 For example, on a PRD cluster, `PRD PPRD` also allows the PPRD objects to run.
 
 
+## Keyword `allowed_cidrs`
+
+	required:    false
+	scopable:    false
+	convert:     list
+	rbac:        This driver group requires the root grant.
+
+**Example:**
+
+	allowed_cidrs=10.0.5.0/24
+
+**Description:**
+
+The address ranges the `allowed_urls` may resolve in, out of the private ranges the
+node policy on urls refuses, as `10.0.5.0/24`: the network of a mirror of the site.
+
+A url is fetched as root from the node, with what the node may reach: an address
+range opened here is opened to all the users allowed a url of it.
+
+
 ## Keyword `allowed_networks`
 
 	required:    false
@@ -80,6 +102,27 @@ For example, on a PRD cluster, `PRD PPRD` also allows the PPRD objects to run.
 The list of cidr blocks the agents allows creation of backend network into.
 
 Should be restricted to match your site constraints.
+
+
+## Keyword `allowed_urls`
+
+	required:    false
+	scopable:    false
+	convert:     list
+	rbac:        This driver group requires the root grant.
+
+**Example:**
+
+	allowed_urls=https://cloud-images.ubuntu.com/* https://images.example.com/*
+
+**Description:**
+
+The urls the cluster trusts to fetch from, on top of what the node policy on urls
+allows, as patterns: `https://cloud-images.ubuntu.com/*`.
+
+They are for all that fetches a url on a node: the image of a virtual machine, the
+source of a key. What is fetched ends up where the users of the cluster can read
+it, the ones with no root grant included, so these are to be sources root trusts.
 
 
 ## Keyword `asset_env`

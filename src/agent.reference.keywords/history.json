@@ -1604,6 +1604,17 @@
    "since": "v3.0.0-rc36",
    "until": null
   },
+  "cluster/listener.public_metrics": {
+   "changes": {},
+   "properties": {
+    "converter": "bool",
+    "default": "false",
+    "inherit": "leaf2head",
+    "textSum": "bbd245a5708f4a93"
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
   "cluster/listener.rate_limiter_burst": {
    "changes": {},
    "properties": {
@@ -1706,6 +1717,17 @@
    "since": "v3.0.0-rc56",
    "until": null
   },
+  "cluster/listener.vsock_port": {
+   "changes": {},
+   "properties": {
+    "converter": "int",
+    "inherit": "leaf2head",
+    "since": "v3.0.0-rc56",
+    "textSum": "acbe814716b93c7b"
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
   "cluster/network.bridge.dev": {
    "changes": {},
    "properties": {
@@ -1763,11 +1785,15 @@
    "until": null
   },
   "cluster/network.lan.dev": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "502adbd8a5387e0f",
+    "textSum": "7d3c138873001229",
     "types": [
      "lan"
     ]
@@ -2024,6 +2050,16 @@
    "since": "v3.0.0-rc48",
    "until": null
   },
+  "cluster/node.allowed_cidrs": {
+   "changes": {},
+   "properties": {
+    "converter": "list",
+    "inherit": "leaf2head",
+    "textSum": "61b5d89d38067c9b"
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
   "cluster/node.allowed_networks": {
    "changes": {},
    "properties": {
@@ -2033,6 +2069,16 @@
     "textSum": "c14f57b66a2fd19e"
    },
    "since": "v3.0.0-rc36",
+   "until": null
+  },
+  "cluster/node.allowed_urls": {
+   "changes": {},
+   "properties": {
+    "converter": "list",
+    "inherit": "leaf2head",
+    "textSum": "77beea500cd0bffd"
+   },
+   "since": "v3.0.0-rc57",
    "until": null
   },
   "cluster/node.asset_env": {
@@ -2613,7 +2659,11 @@
    "until": null
   },
   "cluster/pool.dorado.fs_type": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "types: dorado, drbd, freenas, hoc, loop, pure, rados, symmetrix, truenas, vg -> dorado, drbd, freenas, hoc, pure, rados, symmetrix, truenas, vg"
+    ]
+   },
    "properties": {
     "default": "xfs",
     "inherit": "leaf2head",
@@ -2623,7 +2673,6 @@
      "drbd",
      "freenas",
      "hoc",
-     "loop",
      "pure",
      "rados",
      "symmetrix",
@@ -2943,6 +2992,19 @@
    "since": "v3.0.0-rc36",
    "until": null
   },
+  "cluster/pool.loop.fs_type": {
+   "changes": {},
+   "properties": {
+    "default": "ext4",
+    "inherit": "leaf2head",
+    "textSum": "c1bc9a2cfcc16fa0",
+    "types": [
+     "loop"
+    ]
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
   "cluster/pool.loop.path": {
    "changes": {},
    "properties": {
@@ -3136,7 +3198,12 @@
    "until": null
   },
   "cluster/pool.type": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "default: directory -> loop",
+     "description rewritten"
+    ]
+   },
    "properties": {
     "candidates": [
      "directory",
@@ -3155,9 +3222,9 @@
      "virtual",
      "zpool"
     ],
-    "default": "directory",
+    "default": "loop",
     "inherit": "leaf2head",
-    "textSum": "457a4c6cff9d31b7"
+    "textSum": "1933951180c496f1"
    },
    "since": "v3.0.0-rc36",
    "until": null
@@ -5063,6 +5130,17 @@
    "since": "v3.0.0-rc36",
    "until": null
   },
+  "node/listener.public_metrics": {
+   "changes": {},
+   "properties": {
+    "converter": "bool",
+    "default": "false",
+    "inherit": "leaf2head",
+    "textSum": "bbd245a5708f4a93"
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
   "node/listener.rate_limiter_burst": {
    "changes": {},
    "properties": {
@@ -5165,6 +5243,17 @@
    "since": "v3.0.0-rc56",
    "until": null
   },
+  "node/listener.vsock_port": {
+   "changes": {},
+   "properties": {
+    "converter": "int",
+    "inherit": "leaf2head",
+    "since": "v3.0.0-rc56",
+    "textSum": "acbe814716b93c7b"
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
   "node/network.bridge.dev": {
    "changes": {},
    "properties": {
@@ -5222,11 +5311,15 @@
    "until": null
   },
   "node/network.lan.dev": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "502adbd8a5387e0f",
+    "textSum": "7d3c138873001229",
     "types": [
      "lan"
     ]
@@ -5483,6 +5576,16 @@
    "since": "v3.0.0-rc48",
    "until": null
   },
+  "node/node.allowed_cidrs": {
+   "changes": {},
+   "properties": {
+    "converter": "list",
+    "inherit": "leaf2head",
+    "textSum": "61b5d89d38067c9b"
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
   "node/node.allowed_networks": {
    "changes": {},
    "properties": {
@@ -5492,6 +5595,16 @@
     "textSum": "c14f57b66a2fd19e"
    },
    "since": "v3.0.0-rc36",
+   "until": null
+  },
+  "node/node.allowed_urls": {
+   "changes": {},
+   "properties": {
+    "converter": "list",
+    "inherit": "leaf2head",
+    "textSum": "77beea500cd0bffd"
+   },
+   "since": "v3.0.0-rc57",
    "until": null
   },
   "node/node.asset_env": {
@@ -6277,7 +6390,11 @@
    "until": null
   },
   "node/pool.dorado.fs_type": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "types: dorado, drbd, freenas, hoc, loop, pure, rados, symmetrix, truenas, vg -> dorado, drbd, freenas, hoc, pure, rados, symmetrix, truenas, vg"
+    ]
+   },
    "properties": {
     "default": "xfs",
     "inherit": "leaf2head",
@@ -6287,7 +6404,6 @@
      "drbd",
      "freenas",
      "hoc",
-     "loop",
      "pure",
      "rados",
      "symmetrix",
@@ -6607,6 +6723,19 @@
    "since": "v3.0.0-rc36",
    "until": null
   },
+  "node/pool.loop.fs_type": {
+   "changes": {},
+   "properties": {
+    "default": "ext4",
+    "inherit": "leaf2head",
+    "textSum": "c1bc9a2cfcc16fa0",
+    "types": [
+     "loop"
+    ]
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
   "node/pool.loop.path": {
    "changes": {},
    "properties": {
@@ -6800,7 +6929,12 @@
    "until": null
   },
   "node/pool.type": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "default: directory -> loop",
+     "description rewritten"
+    ]
+   },
    "properties": {
     "candidates": [
      "directory",
@@ -6819,9 +6953,9 @@
      "virtual",
      "zpool"
     ],
-    "default": "directory",
+    "default": "loop",
     "inherit": "leaf2head",
-    "textSum": "457a4c6cff9d31b7"
+    "textSum": "1933951180c496f1"
    },
    "since": "v3.0.0-rc36",
    "until": null
@@ -8420,10 +8554,17 @@
    "until": null
   },
   "svc/app.forking.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "4d4bc9d90e6db359",
     "types": [
@@ -8487,12 +8628,16 @@
    "until": null
   },
   "svc/app.forking.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "forking"
     ]
@@ -8954,10 +9099,17 @@
    "until": null
   },
   "svc/app.forking.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "3951b3cbd8454a9f",
     "types": [
@@ -9320,10 +9472,17 @@
    "until": null
   },
   "svc/app.simple.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "4d4bc9d90e6db359",
     "types": [
@@ -9387,12 +9546,16 @@
    "until": null
   },
   "svc/app.simple.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "simple"
     ]
@@ -9872,10 +10035,17 @@
    "until": null
   },
   "svc/app.simple.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "3951b3cbd8454a9f",
     "types": [
@@ -10216,10 +10386,17 @@
    "until": null
   },
   "svc/container.docker.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "2070963b9503ac0f",
     "types": [
@@ -10341,12 +10518,16 @@
    "until": null
   },
   "svc/container.docker.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "docker"
     ]
@@ -10916,10 +11097,17 @@
    "until": null
   },
   "svc/container.docker.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "8bdc392f4ca30c91",
     "types": [
@@ -11274,6 +11462,46 @@
    "since": "v3.0.0-rc36",
    "until": null
   },
+  "svc/container.kvm.bridge": {
+   "changes": {},
+   "properties": {
+    "converter": "list",
+    "inherit": "leaf2head",
+    "provisioning": true,
+    "textSum": "b3ad3a0548c4c530",
+    "types": [
+     "kvm"
+    ]
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
+  "svc/container.kvm.cdrom": {
+   "changes": {},
+   "properties": {
+    "inherit": "leaf2head",
+    "provisioning": true,
+    "textSum": "e84899890af1a3fc",
+    "types": [
+     "kvm"
+    ]
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
+  "svc/container.kvm.cloud_init": {
+   "changes": {},
+   "properties": {
+    "inherit": "leaf2head",
+    "provisioning": true,
+    "textSum": "1015d0974a2546c3",
+    "types": [
+     "kvm"
+    ]
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
   "svc/container.kvm.disable": {
    "changes": {},
    "properties": {
@@ -11286,6 +11514,20 @@
     ]
    },
    "since": "v3.0.0-rc36",
+   "until": null
+  },
+  "svc/container.kvm.disk": {
+   "changes": {},
+   "properties": {
+    "converter": "list",
+    "inherit": "leaf2head",
+    "provisioning": true,
+    "textSum": "cea89c56bff63c67",
+    "types": [
+     "kvm"
+    ]
+   },
+   "since": "v3.0.0-rc57",
    "until": null
   },
   "svc/container.kvm.encap": {
@@ -11335,6 +11577,33 @@
    "since": "v3.0.0-rc36",
    "until": null
   },
+  "svc/container.kvm.image": {
+   "changes": {},
+   "properties": {
+    "inherit": "leaf2head",
+    "provisioning": true,
+    "textSum": "a2633be99489fa1d",
+    "types": [
+     "kvm"
+    ]
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
+  "svc/container.kvm.memory": {
+   "changes": {},
+   "properties": {
+    "converter": "size",
+    "inherit": "leaf2head",
+    "provisioning": true,
+    "textSum": "1155d2b46ad68775",
+    "types": [
+     "kvm"
+    ]
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
   "svc/container.kvm.migrate_timeout": {
    "changes": {},
    "properties": {
@@ -11364,10 +11633,13 @@
    "until": null
   },
   "svc/container.kvm.name": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "required: true -> unset"
+    ]
+   },
    "properties": {
     "inherit": "leaf2head",
-    "required": true,
     "scopable": true,
     "textSum": "9560100c30d8ddcb",
     "types": [
@@ -11375,6 +11647,33 @@
     ]
    },
    "since": "v3.0.0-rc36",
+   "until": null
+  },
+  "svc/container.kvm.network": {
+   "changes": {},
+   "properties": {
+    "converter": "list",
+    "inherit": "leaf2head",
+    "textSum": "9361b375c0692fe6",
+    "types": [
+     "kvm"
+    ]
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
+  "svc/container.kvm.network_filter": {
+   "changes": {},
+   "properties": {
+    "converter": "bool",
+    "default": "true",
+    "inherit": "leaf2head",
+    "textSum": "8a3fb028a5b4eb5a",
+    "types": [
+     "kvm"
+    ]
+   },
+   "since": "v3.0.0-rc57",
    "until": null
   },
   "svc/container.kvm.no_preempt_abort": {
@@ -11403,6 +11702,19 @@
     ]
    },
    "since": "v3.0.0-rc36",
+   "until": null
+  },
+  "svc/container.kvm.osinfo": {
+   "changes": {},
+   "properties": {
+    "inherit": "leaf2head",
+    "provisioning": true,
+    "textSum": "1c4565e67269bbb5",
+    "types": [
+     "kvm"
+    ]
+   },
+   "since": "v3.0.0-rc57",
    "until": null
   },
   "svc/container.kvm.osvc_root_path": {
@@ -11798,18 +12110,65 @@
    "since": "v3.0.0-rc36",
    "until": null
   },
-  "svc/container.kvm.virtinst": {
+  "svc/container.kvm.vcpus": {
    "changes": {},
+   "properties": {
+    "converter": "int",
+    "inherit": "leaf2head",
+    "provisioning": true,
+    "textSum": "7c08077974563ec6",
+    "types": [
+     "kvm"
+    ]
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
+  "svc/container.kvm.virtinst": {
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "provisioning": true,
-    "textSum": "91d268ac6968428d",
+    "textSum": "69ec758b31a62acc",
     "types": [
      "kvm"
     ]
    },
    "since": "v3.0.0-rc36",
+   "until": null
+  },
+  "svc/container.kvm.virtinst_args": {
+   "changes": {},
+   "properties": {
+    "converter": "shlex",
+    "inherit": "leaf2head",
+    "provisioning": true,
+    "textSum": "05b775fb83d425ff",
+    "types": [
+     "kvm"
+    ]
+   },
+   "since": "v3.0.0-rc57",
+   "until": null
+  },
+  "svc/container.kvm.vsock_port": {
+   "changes": {},
+   "properties": {
+    "converter": "int",
+    "default": "1215",
+    "inherit": "leaf2head",
+    "scopable": true,
+    "textSum": "ffc78907d0a9107a",
+    "types": [
+     "kvm"
+    ]
+   },
+   "since": "v3.0.0-rc57",
    "until": null
   },
   "svc/container.lxc.blocking_post_provision": {
@@ -11934,11 +12293,18 @@
    "until": null
   },
   "svc/container.lxc.create_configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> create_environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
     "provisioning": true,
+    "replacedBy": "create_environment",
     "scopable": true,
     "textSum": "bed8ffeefc80e17a",
     "types": [
@@ -11949,13 +12315,17 @@
    "until": null
   },
   "svc/container.lxc.create_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "provisioning": true,
     "scopable": true,
-    "textSum": "d95a0d4d383845a3",
+    "textSum": "82dd36eaec841ba0",
     "types": [
      "lxc"
     ]
@@ -11964,11 +12334,18 @@
    "until": null
   },
   "svc/container.lxc.create_secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> create_environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
     "provisioning": true,
+    "replacedBy": "create_environment",
     "scopable": true,
     "textSum": "5bf982804addcd17",
     "types": [
@@ -12644,10 +13021,17 @@
    "until": null
   },
   "svc/container.oci.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "2070963b9503ac0f",
     "types": [
@@ -12769,12 +13153,16 @@
    "until": null
   },
   "svc/container.oci.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "oci"
     ]
@@ -13372,10 +13760,17 @@
    "until": null
   },
   "svc/container.oci.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "8bdc392f4ca30c91",
     "types": [
@@ -13752,10 +14147,17 @@
    "until": null
   },
   "svc/container.podman.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "2070963b9503ac0f",
     "types": [
@@ -13877,12 +14279,16 @@
    "until": null
   },
   "svc/container.podman.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "podman"
     ]
@@ -14480,10 +14886,17 @@
    "until": null
   },
   "svc/container.podman.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "8bdc392f4ca30c91",
     "types": [
@@ -69931,10 +70344,17 @@
    "until": null
   },
   "svc/task.docker.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "2070963b9503ac0f",
     "types": [
@@ -70054,12 +70474,16 @@
    "until": null
   },
   "svc/task.docker.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "docker"
     ]
@@ -70628,10 +71052,17 @@
    "until": null
   },
   "svc/task.docker.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "8bdc392f4ca30c91",
     "types": [
@@ -70978,10 +71409,17 @@
    "until": null
   },
   "svc/task.host.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "4d4bc9d90e6db359",
     "types": [
@@ -71058,12 +71496,16 @@
    "until": null
   },
   "svc/task.host.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "host"
     ]
@@ -71523,10 +71965,17 @@
    "until": null
   },
   "svc/task.host.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "3951b3cbd8454a9f",
     "types": [
@@ -71839,10 +72288,17 @@
    "until": null
   },
   "svc/task.oci.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "2070963b9503ac0f",
     "types": [
@@ -71962,12 +72418,16 @@
    "until": null
   },
   "svc/task.oci.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "oci"
     ]
@@ -72564,10 +73024,17 @@
    "until": null
   },
   "svc/task.oci.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "8bdc392f4ca30c91",
     "types": [
@@ -72948,10 +73415,17 @@
    "until": null
   },
   "svc/task.podman.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "2070963b9503ac0f",
     "types": [
@@ -73071,12 +73545,16 @@
    "until": null
   },
   "svc/task.podman.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "podman"
     ]
@@ -73673,10 +74151,17 @@
    "until": null
   },
   "svc/task.podman.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "8bdc392f4ca30c91",
     "types": [
@@ -74749,12 +75234,16 @@
    "until": null
   },
   "usr/DEFAULT.grant": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "listlowercase",
     "inherit": "head",
     "scopable": true,
-    "textSum": "bfe7b77645cad525"
+    "textSum": "c25c1aafc9fc5887"
    },
    "since": "v3.0.0-rc36",
    "until": null
@@ -126146,10 +126635,17 @@
    "until": null
   },
   "vol/task.docker.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "2070963b9503ac0f",
     "types": [
@@ -126269,12 +126765,16 @@
    "until": null
   },
   "vol/task.docker.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "docker"
     ]
@@ -126843,10 +127343,17 @@
    "until": null
   },
   "vol/task.docker.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "8bdc392f4ca30c91",
     "types": [
@@ -127193,10 +127700,17 @@
    "until": null
   },
   "vol/task.host.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "4d4bc9d90e6db359",
     "types": [
@@ -127273,12 +127787,16 @@
    "until": null
   },
   "vol/task.host.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "host"
     ]
@@ -127738,10 +128256,17 @@
    "until": null
   },
   "vol/task.host.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "3951b3cbd8454a9f",
     "types": [
@@ -128054,10 +128579,17 @@
    "until": null
   },
   "vol/task.oci.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "2070963b9503ac0f",
     "types": [
@@ -128177,12 +128709,16 @@
    "until": null
   },
   "vol/task.oci.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "oci"
     ]
@@ -128779,10 +129315,17 @@
    "until": null
   },
   "vol/task.oci.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "8bdc392f4ca30c91",
     "types": [
@@ -129163,10 +129706,17 @@
    "until": null
   },
   "vol/task.podman.configs_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "2070963b9503ac0f",
     "types": [
@@ -129286,12 +129836,16 @@
    "until": null
   },
   "vol/task.podman.environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "shlex",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "2a88b995106f65da",
+    "textSum": "069788cee16eb5e1",
     "types": [
      "podman"
     ]
@@ -129888,10 +130442,17 @@
    "until": null
   },
   "vol/task.podman.secrets_environment": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc57": [
+     "deprecated: unset -> v3.0.0-rc57",
+     "replacedBy: unset -> environment"
+    ]
+   },
    "properties": {
     "converter": "shlex",
+    "deprecated": "v3.0.0-rc57",
     "inherit": "leaf2head",
+    "replacedBy": "environment",
     "scopable": true,
     "textSum": "8bdc392f4ca30c91",
     "types": [
@@ -130868,6 +131429,7 @@
   "v3.0.0-rc50",
   "v3.0.0-rc52",
   "v3.0.0-rc53",
-  "v3.0.0-rc56"
+  "v3.0.0-rc56",
+  "v3.0.0-rc57"
  ]
 }
