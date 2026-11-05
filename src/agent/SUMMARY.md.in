@@ -1,7 +1,5 @@
 # Agent
 
-- [Install](agent/install.md)
-- [Your First Service](agent/firstservice.md)
 - [Configure](agent/configure.md)
   - [Node](agent/configure.base.md)
   - [Cluster](agent/configure.cluster.md)
