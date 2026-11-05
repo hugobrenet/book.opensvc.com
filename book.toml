@@ -11,7 +11,11 @@ mathjax-support = false
 additional-css = ["theme/custom.css"]
 additional-js = ["theme/custom.js"]
 #additional-js = ["custom.js"]
-no-section-label = false
+# The sidebar names the chapters without their numbers.
+no-section-label = true
+# The headings of the page are listed on its right, by theme/custom.js, not
+# under its chapter in the sidebar.
+sidebar-header-nav = false
 git-repository-url = "https://github.com/opensvc/om3"
 git-repository-icon = "fab-github"
 #edit-url-template = "https://github.com/rust-lang/mdBook/edit/master/guide/{path}"
@@ -21,7 +25,7 @@ input-404 = "not-found.md"
 
 [output.html.search]
 enable = true            # enables the search feature
-limit-results = 30       # maximum number of search results
+limit-results = 10       # maximum number of search results
 teaser-word-count = 30   # number of words used for a search result teaser
 use-boolean-and = true   # multiple search terms must all match
 boost-title = 2          # ranking boost factor for matches in headers
@@ -40,3 +44,7 @@ level = 0
 # The cluster networks page was named after the cni, which it no longer
 # centers on.
 "/agent/configure.cni.html" = "/agent/configure.networks.html"
+
+# No print page: the book has no "Print this book" button, and no print.html.
+[output.html.print]
+enable = false
