@@ -103,8 +103,8 @@ Save it as `haproxy.cfg`, and store it in the cfg, with the lua responder:
 
 ```bash
 om igw/cfg/haproxy create
-om igw/cfg/haproxy key add --name haproxy.cfg --from haproxy.cfg
-om igw/cfg/haproxy key add --name acme-http01-webroot.lua \
+om igw/cfg/haproxy key add haproxy.cfg --from haproxy.cfg
+om igw/cfg/haproxy key add acme-http01-webroot.lua \
   --from https://raw.githubusercontent.com/opensvc/opensvc_templates/main/igw_haproxy/common/acme-http01-webroot.lua
 ```
 

@@ -83,9 +83,9 @@ curl -s -X PATCH -H "Authorization: Bearer $TOKEN" -G \
 
 ```bash
 om system/cfg/dns create
-om system/cfg/dns key add --name server --from https://raw.githubusercontent.com/opensvc/opensvc_templates/main/dns/pdns.conf.template
-om system/cfg/dns key add --name recursor --from https://raw.githubusercontent.com/opensvc/opensvc_templates/main/dns/recursor.conf.template
-om system/cfg/dns key add --name configure --from https://raw.githubusercontent.com/opensvc/opensvc_templates/main/dns/configure
+om system/cfg/dns key add server --from https://raw.githubusercontent.com/opensvc/opensvc_templates/main/dns/pdns.conf.template
+om system/cfg/dns key add recursor --from https://raw.githubusercontent.com/opensvc/opensvc_templates/main/dns/recursor.conf.template
+om system/cfg/dns key add configure --from https://raw.githubusercontent.com/opensvc/opensvc_templates/main/dns/configure
 om system/svc/dns deploy --config https://raw.githubusercontent.com/opensvc/opensvc_templates/main/dns/dns.conf
 ```
 

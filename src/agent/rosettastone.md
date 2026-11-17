@@ -34,7 +34,7 @@ the command you know to its OpenSVC equivalent.
 | :--- | :--- |
 | `om <path> create --config ./manifest.conf` | `kubectl create -f ./my-manifest.yaml` |
 | `cat <cf> \| om <path> create --config=-` | `cat <cf> \| kubectl create -f -` |
-| `om ns1/sec/mysec key add --name grp --from /etc/group` | `kubectl create -f secret.yml` |
+| `om ns1/sec/mysec key add grp --from /etc/group` | `kubectl create -f secret.yml` |
 
 ### Viewing and finding
 

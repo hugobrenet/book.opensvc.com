@@ -35,7 +35,7 @@ Three objects of the `system` namespace:
 
 ```bash
 om system/sec/strongswan create
-om system/sec/strongswan key add --name psk --value "$(openssl rand -base64 32)"
+openssl rand -base64 32 | om system/sec/strongswan key add psk --from /dev/stdin
 ```
 
 </div>
@@ -119,8 +119,8 @@ charon {
 
 ```bash
 om system/cfg/strongswan create
-om system/cfg/strongswan key add --name swanctl.conf --from swanctl.conf
-om system/cfg/strongswan key add --name strongswan.conf --from strongswan.conf
+om system/cfg/strongswan key add swanctl.conf --from swanctl.conf
+om system/cfg/strongswan key add strongswan.conf --from strongswan.conf
 ```
 
 </div>
@@ -277,7 +277,7 @@ the template read it, and the install has strongSwan load it:
 <div class="tab" data-title="CLI">
 
 ```bash
-om system/sec/strongswan key change --name psk --value "$(openssl rand -base64 32)"
+openssl rand -base64 32 | om system/sec/strongswan key change psk --from /dev/stdin
 ```
 
 </div>

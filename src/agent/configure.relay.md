@@ -57,8 +57,8 @@ Set a password for the user. Example with a random generated password:
 <div class="tab" data-title="CLI">
 
 ```bash
-om system/usr/relay key add --name=password --from /dev/urandom
-om system/usr/relay key decode --name=password
+om system/usr/relay key add password --from /dev/urandom
+om system/usr/relay key decode password
 ```
 
 </div>

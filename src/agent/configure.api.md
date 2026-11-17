@@ -269,9 +269,9 @@ The initial configuration is done automatically upon agent installation and daem
 
 1. **Import a valid certificate in `system/sec/ca`:**
     ```bash
-    om system/sec/ca key change --name certificate --from ~/$CLUSTERNAME.pem
-    om system/sec/ca key change --name certificate_chain --from ~/$CLUSTERNAME.chain
-    om system/sec/ca key change --name private_key --from ~/$CLUSTERNAME.key
+    om system/sec/ca key change certificate --from ~/$CLUSTERNAME.pem
+    om system/sec/ca key change certificate_chain --from ~/$CLUSTERNAME.chain
+    om system/sec/ca key change private_key --from ~/$CLUSTERNAME.key
     ```
 2. **Recreate the listener certificate:**
     ```bash
@@ -301,7 +301,7 @@ The initial configuration is done automatically upon agent installation and daem
 3.  **Perform External Signing:** *(This is an external procedure to be done with your PKI tool using the generated csr.)*
 4.  **Load the Signed Certificate:**
     ```bash
-    om system/sec/cert key change --name certificate_chain --from ~/$CLUSTERNAME_crt_chain.pem
+    om system/sec/cert key change certificate_chain --from ~/$CLUSTERNAME_crt_chain.pem
     ```
     The certificate is always first, then the CA certificate chain.
 5.  **Configure Certificate Revocation List (Optional):**

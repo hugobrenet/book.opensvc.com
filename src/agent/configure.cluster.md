@@ -104,8 +104,8 @@ The same enroll, driven from a host that is a member of neither cluster.
 
 ```bash
 om system/usr/enroller create --kw grant=join
-om system/usr/enroller key add --name=password --from /dev/urandom
-om system/usr/enroller key decode --name=password
+om system/usr/enroller key add password --from /dev/urandom
+om system/usr/enroller key decode password
 ```
 
 **2. Ask that node for a token with the `join` role**

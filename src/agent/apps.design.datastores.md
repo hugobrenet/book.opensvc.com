@@ -17,7 +17,7 @@ starts. `sec` keys are encrypted at rest with the cluster secret.
 
 ```bash
 om myapp/cfg/app create
-om myapp/cfg/app key add --name app.conf --from /tmp/app.conf
+om myapp/cfg/app key add app.conf --from /tmp/app.conf
 om myapp/cfg/app key list
 ```
 

@@ -121,7 +121,7 @@ Create the user of the prometheus:
 
 ```
 om system/usr/prometheus create --kw grant=scraper
-om system/usr/prometheus key add --name password --value <password>
+om system/usr/prometheus key add password --value <password>
 ```
 
 </div>
