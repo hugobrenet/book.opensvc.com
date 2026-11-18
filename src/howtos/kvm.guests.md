@@ -1,3 +1,4 @@
+<!-- llms: KVM guests a container.kvm resource describes with a few keywords: cloud image or cdrom install, volume files, networks, display, logs, caps, and what a namespace administrator may set. -->
 # KVM Guests
 
 A `container.kvm` resource can describe a guest with a few keywords, instead of a `virtinst` command. `virt-install` and libvirt pick the qemu options for the node.
