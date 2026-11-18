@@ -1,0 +1,170 @@
+<!-- llms: The AI assistant of the clusters and the collector: what it answers and does, with the rights of the user who asks, its MCP servers, the confirmation of actions, and what it stores. -->
+# AI Assistant
+
+The AI assistant answers questions about the clusters and the collector, and
+acts on them, from a chat: "why is this service down?", "which drivers can I
+use on this node?", "freeze the node before its maintenance", "which services
+failed to start last night?". It reads the state through the same APIs as the
+interfaces and the `om` command, with the rights of the user who asks, and
+runs no destructive action without the user confirming it.
+
+Users reach it from two interfaces:
+
+* **the webapp of a cluster**, for the questions on that cluster, answered
+  through the daemons, on the page of the assistant or in a dock over every
+  page, which sends the context of the page with the question;
+* **the interface of the collector**, for the questions across the clusters,
+  answered through the collector, which relays the chat to the agent.
+
+One deployment serves a whole site: the clusters it is configured for, and
+the collector. It runs as one OpenSVC service on one cluster, such as the
+cluster of the collector, and is made of three components:
+
+* **The agent** serves the chat to the interfaces. It runs the conversation with a
+  language model, offers it the tools of the MCP servers, asks the user to
+  confirm a destructive action, and stores the conversations.
+* **om3-mcp** gives the model the tools of the cluster: the status of the
+  objects, instances and nodes, their configuration, logs and capabilities,
+  and, when enabled, the actions, such as start, stop, freeze or switch. Each
+  tool is a typed use of the daemon API, its result trimmed to what answers
+  the question.
+* **oc3-mcp**, optional, gives the model the tools of the collector: the
+  inventory of the nodes and services of every cluster, their alerts, the
+  actions the agents reported, the orchestrations, the forms. It serves the
+  questions that span clusters.
+
+Both MCPs also serve the resources and the skills of the assistant: reference
+texts and procedures, such as the maintenance of a node, which the model
+reads when a question needs them. The MCPs embed none: the collector stores
+them, an `AIManager` of the collector publishes them, and each MCP reads
+them as the user ([Resources and skills](configure.md#resources-and-skills)).
+
+The MCPs also serve [external MCP clients](#the-mcp-servers-alone) directly,
+without the agent.
+
+```text
+   webapps of the clusters        collector interface
+              │                            │
+              │                          HTTPS
+              │                            ▼
+              │                collector /api/assistant
+              │                            │
+            HTTPS                        HTTPS
+              ▼                            ▼
+   ┌──────────────────────────────────────────────────────────────────┐
+   │       /v1/om3        agent         /v1/oc3                       │
+   └──────────────────────────────────────────────────────────────────┘
+              │                            │                  │
+         unix socket                  unix socket           HTTPS
+              ▼                            ▼                  ▼
+           om3-mcp                      oc3-mcp      language model API
+              │                            │
+            HTTPS                        HTTPS
+              ▼                            ▼
+   daemons of the clusters;          collector API
+   for the resources and skills,
+   SSO token endpoint and
+   collector API
+```
+
+The agent serves two backends: `/v1/om3` for the webapps, the cluster of each
+request named by its `X-OpenSVC-Cluster-ID` header, and `/v1/oc3` for the
+collector.
+
+## The MCP servers alone
+
+The MCPs serve other MCP clients too, over HTTPS: Claude Desktop, an IDE, or
+an agent of the customer's own, with the model of their choice. A site may
+deploy the MCPs without the agent and the webapp chat, its users reaching the
+clusters and the collector from the client they already use:
+
+```text
+   external MCP client (Claude Desktop, an IDE, an agent…)
+           │                              │
+   HTTPS, OAuth sign-in           HTTPS, OAuth sign-in
+           ▼                              ▼
+    om3-mcp :8443                  oc3-mcp :8444
+           │                              │
+   HTTPS, token exchanged         HTTPS, token exchanged
+           ▼                              ▼
+ daemons of the clusters            collector API
+```
+
+The client signs the user in with OAuth, and calls the tools of the MCP with
+its token. For each call, the MCP exchanges that token for one of the daemon,
+or of the collector, carrying the grants of the same user: the rights are the
+user's, as with the assistant. The tools are the same; the client chooses
+them, and the confirmation of the actions is the client's: the MCP marks the
+tools that change the state, which a client asks the user to confirm, and
+`OPENSVC_MCP_ACTIONS` left disabled keeps the MCP read-only. The settings are
+in [External MCP clients](configure.md#external-mcp-clients).
+
+## Whose rights
+
+The assistant has no rights of its own. The webapp signs the user in with the
+OpenID provider the daemons of the cluster trust, and the collector interface
+with the provider of the collector; each sends the access token of the user
+with each message. The agent passes that token, unchanged, to the
+MCP, which verifies it against the provider it is configured with for the
+cluster, or the collector, then calls the daemon, or the collector, with it:
+they check the token again and enforce the grants of the user, as for any
+other client. A user who may not
+stop a service cannot have the assistant stop it.
+
+To read the resources and the skills of the collector for a cluster,
+om3-mcp exchanges the token of the user, at the token endpoint of the single
+sign-on, for a token of the collector, carrying the grants of the same user:
+the token of a cluster never reaches the collector, nor the token of the
+collector a daemon.
+
+The token is never stored, logged, or given to the model.
+
+## Confirmation of the actions
+
+Each MCP marks the tools that change the state, and those of them that are
+destructive: that stop, delete, overwrite or move what runs, such as stop,
+switch, delete or the update of a node of the collector. Before a destructive
+tool runs, the agent stops the turn and shows the user the exact call: the
+tool, the object and the node, and what it would change when the MCP tells
+it. The action runs only once the user approves it, within 10 minutes; a
+rejection is told to the model, which goes on without it. The user may edit
+the arguments of the call before approving it.
+
+The other actions, such as start, freeze or provision on a cluster, or the
+creation of a tag on the collector, run without confirmation, as the reads
+do: the model is told to call them only when the user asked for them, and
+nothing asks the user first; the grants of the user still apply, and
+`OPENSVC_MCP_ACTIONS` left disabled keeps an MCP read-only. The marks of each tool are listed in the
+documentation of
+[om3-mcp](https://github.com/opensvc/om3-mcp/blob/main/docs/tools/README.md)
+and [oc3-mcp](https://github.com/opensvc/oc3-mcp/blob/main/docs/tools/README.md).
+
+The confirmation is the guard of the destructive actions: the daemon, and the
+collector for oc3-mcp, remain the authority on what a user may do.
+
+## What is stored
+
+The agent keeps, in a SQLite database on the volume of its service:
+
+* the conversations of each user, their messages and the calls of their
+  tools, for the lifetime of the conversation, 7 days by default from its last
+  turn;
+* the feedback the users give on the answers: a rating, and a copy of the
+  turn rated, its question, its answer and its tool calls with their
+  arguments and the start of their results, without the identity of the
+  user once the conversation is deleted, kept 180 days by default.
+
+The model sees the questions, the context of the page they come from, the
+results of the tools, the resources and skills it reads, and, when enabled,
+the pages of this book and the source code of the daemon it searches
+([What the model sees](design.md#what-the-model-sees)). The email addresses
+the collector holds are masked before they reach it, and the phone numbers
+are never read.
+
+## Next
+
+* [Install](install.md) the service.
+* [Configure](configure.md) the language model, the clusters, the collector
+  and the interfaces.
+* [Operate](operate.md) it: upgrade, failover, logs.
+* [Design](design.md) explains the choices behind it.

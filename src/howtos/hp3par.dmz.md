@@ -1,3 +1,4 @@
+<!-- llms: HPE 3PAR Remote Copy failover for a cluster in a DMZ, through an ssh bastion whose forced command passes on only the Remote Copy commands, the array credentials kept on the bastion. -->
 HPE 3PAR Remote Copy from a DMZ
 ---
 

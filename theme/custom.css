@@ -390,7 +390,503 @@ html.sidebar-visible #mdbook-search-toggle {
     display: none;
 }
 
-/* The headings of the page read fold with its chapter. */
-.chapter li.chapter-item:not(.expanded) > .on-this-page {
+/* Page outline: the headings of the page read, on its right on a wide
+   screen, the one being read marked. The content makes room for it. */
+.page-toc {
     display: none;
+}
+
+@media only screen and (min-width: 1300px) {
+    html.has-page-toc .page-toc {
+        display: block;
+        position: fixed;
+        top: calc(var(--menu-bar-height) + 32px);
+        right: 24px;
+        width: 220px;
+        max-height: calc(100vh - var(--menu-bar-height) - 64px);
+        overflow-y: auto;
+        font-size: 0.875em;
+    }
+
+    html.has-page-toc .page-wrapper .content {
+        padding-right: 260px;
+    }
+}
+
+.page-toc-title {
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--fg);
+}
+
+.page-toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid color-mix(in srgb, var(--fg) 15%, transparent);
+}
+
+.page-toc li a {
+    display: block;
+    margin-left: -1px;
+    padding: 4px 0 4px 12px;
+    border-left: 2px solid transparent;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--fg) 65%, transparent);
+    text-decoration: none;
+}
+
+.page-toc li.page-toc-h3 a {
+    padding-left: 24px;
+}
+
+.page-toc li a:hover {
+    color: var(--fg);
+}
+
+.page-toc li a.active {
+    border-left-color: var(--links);
+    color: var(--links);
+}
+
+/* Pager: the previous and the next page at the foot of the page read, with
+   their titles; the arrows on the sides of the screen are hidden. */
+.nav-wide-wrapper {
+    display: none !important;
+}
+
+.nav-wrapper.pager {
+    display: flex !important;
+    gap: 16px;
+    max-width: var(--content-max-width);
+    margin: 48px auto 0;
+    padding-top: 24px;
+    border-top: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+}
+
+.nav-wrapper.pager > div {
+    display: none;
+}
+
+.pager .pager-link,
+.pager .pager-link:visited {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    gap: 4px;
+    max-width: calc(50% - 8px);
+    width: auto;
+    float: none;
+    margin: 0;
+    padding: 14px 18px;
+    border: 1px solid color-mix(in srgb, var(--fg) 15%, transparent);
+    border-radius: 8px;
+    background: none;
+    font-size: 1em;
+    text-align: left;
+    text-decoration: none;
+}
+
+.pager .pager-link.next {
+    margin-left: auto;
+    text-align: right;
+}
+
+.pager .pager-link:hover {
+    border-color: var(--links);
+}
+
+.pager-direction {
+    font-size: 0.85em;
+    color: color-mix(in srgb, var(--fg) 60%, transparent);
+}
+
+.pager-link.previous .pager-direction::before {
+    content: "← ";
+}
+
+.pager-link.next .pager-direction::after {
+    content: " →";
+}
+
+.pager-title {
+    font-weight: 600;
+    color: var(--links);
+}
+
+@media print {
+    .page-toc,
+    .nav-wrapper.pager {
+        display: none !important;
+    }
+}
+
+/* Sidebar: the chapters stand off its left edge, their text 24 px from it
+   once their links take their own padding. */
+.sidebar .sidebar-scrollbox {
+    padding: 8px 12px 24px 14px;
+}
+
+/* The list starts right under the head. */
+.sidebar .chapter {
+    margin-top: 0;
+}
+
+/* Sidebar entries are spaced as on modelcontextprotocol.io: each link a
+   rounded block with room around its name, highlighted under the pointer
+   and when it is the page read; the parts well apart, their titles small.
+   mdbook 0.4 puts the link and its fold arrow in the li, 0.5 in a
+   .chapter-link-wrapper. */
+.chapter li.chapter-item {
+    margin-block-start: 1px;
+    line-height: 1.4;
+}
+
+.chapter li.chapter-item > a:not(.toggle),
+.chapter .chapter-link-wrapper > a:not(.chapter-fold-toggle) {
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+.chapter li.chapter-item > a:not(.toggle):hover,
+.chapter .chapter-link-wrapper > a:not(.chapter-fold-toggle):hover {
+    background: color-mix(in srgb, var(--sidebar-fg) 7%, transparent);
+}
+
+.chapter li.chapter-item > a.active,
+.chapter .chapter-link-wrapper > a.active {
+    background: color-mix(in srgb, var(--sidebar-active) 12%, transparent);
+    font-weight: 600;
+}
+
+.chapter li.part-title {
+    margin: 24px 0 6px;
+    padding: 0 10px;
+    line-height: 1.6;
+    font-size: 0.85em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+/* The first part of a section opens it with no margin: mdbook 0.4 puts an
+   empty affix item before it. */
+.chapter > li.part-title:first-child,
+.chapter > li.affix:first-child + li.part-title,
+.chapter > li.sidebar-section-hidden + li.part-title {
+    margin-top: 4px;
+}
+
+/* A sub-chapter hangs off a thin rule under its chapter. */
+.chapter ol.section {
+    margin-inline-start: 14px;
+    padding-inline-start: 6px;
+    border-inline-start: 1px solid color-mix(in srgb, var(--sidebar-fg) 15%, transparent);
+}
+
+/* Fixed sidebar: on a wide screen it always shows, with no toggle and no
+   resize handle. */
+@media only screen and (min-width: 1080px) {
+    #mdbook-sidebar-toggle,
+    #sidebar-toggle,
+    .sidebar-resize-handle {
+        display: none !important;
+    }
+}
+
+/* Page actions: a menu on the right of the title of the page, to copy its
+   markdown or open it. The button copies at once; its chevron opens the
+   menu. */
+.page-title-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.page-title-row > h1 {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.page-actions {
+    position: relative;
+    display: flex;
+    flex: none;
+    font-size: 0.85em;
+}
+
+.page-actions-main,
+.page-actions-main:visited,
+.page-actions-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+    background: transparent;
+    color: var(--fg);
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.page-actions-main {
+    border-radius: 8px 0 0 8px;
+}
+
+.page-actions-more {
+    margin-left: -1px;
+    padding: 0 8px;
+    border-radius: 0 8px 8px 0;
+}
+
+.page-actions-main:hover,
+.page-actions-more:hover {
+    background: color-mix(in srgb, var(--fg) 6%, transparent);
+}
+
+.page-actions-icon {
+    display: inline-flex;
+}
+
+.page-actions-icon svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+/* The chevron points down while the menu is closed, up while it is open. */
+.page-actions-more .page-actions-icon svg {
+    transition: transform 0.15s ease;
+}
+
+.page-actions-more[aria-expanded="true"] .page-actions-icon svg {
+    transform: rotate(180deg);
+}
+
+.page-actions-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 20;
+    min-width: 260px;
+    padding: 6px;
+    border: 1px solid color-mix(in srgb, var(--fg) 15%, transparent);
+    border-radius: 10px;
+    background: var(--bg);
+    box-shadow: 0 8px 24px color-mix(in srgb, #000 18%, transparent);
+}
+
+.page-actions-menu[hidden] {
+    display: none;
+}
+
+.page-actions-item,
+.page-actions-item:visited {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 6px;
+    background: none;
+    color: var(--fg);
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.page-actions-item:hover {
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+}
+
+.page-actions-item .page-actions-icon {
+    margin-top: 3px;
+}
+
+.page-actions-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.page-actions-name {
+    font-weight: 600;
+}
+
+.page-actions-detail {
+    font-size: 0.9em;
+    color: color-mix(in srgb, var(--fg) 60%, transparent);
+}
+
+@media only screen and (max-width: 600px) {
+    .page-actions-label {
+        display: none;
+    }
+}
+
+@media print {
+    .page-actions {
+        display: none !important;
+    }
+}
+
+/* The arrow that folds the sub-chapters of a chapter follows its name, not
+   the right edge of the sidebar. mdbook 0.4 names it a.toggle, 0.5
+   .chapter-fold-toggle. */
+.chapter li > a.toggle,
+.chapter .chapter-fold-toggle {
+    margin-inline-start: 0;
+    padding: 0 8px;
+}
+
+/* The fold arrow is a thin, pointed chevron rather than the ❱ glyph: the
+   glyph is hidden and the chevron drawn in gray, the text color while the
+   pointer is on it. mdbook
+   turns the div a quarter when the chapter unfolds. */
+.chapter li > a.toggle div,
+.chapter .chapter-fold-toggle div {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    vertical-align: middle;
+    font-size: 0;
+    background-color: color-mix(in srgb, var(--sidebar-fg) 45%, transparent);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolyline points='2.5,2 7.5,5 2.5,8' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolyline points='2.5,2 7.5,5 2.5,8' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.chapter li > a.toggle:hover div,
+.chapter .chapter-fold-toggle:hover div {
+    background-color: var(--sidebar-fg);
+}
+
+/* The links of the page menu keep the text color: mdbook colors the links of
+   the page, .content a:link, the visited ones with a weaker rule, so the
+   button was blue on a page whose markdown was never opened. */
+.content .page-actions a:link,
+.content .page-actions a:visited {
+    color: var(--fg);
+}
+
+/* Search in front of the page: a panel at the top of the screen over a
+   grayed backdrop, the page not scrolling behind it. mdbook 0.4 names the
+   wrapper search-wrapper, 0.5 mdbook-search-wrapper. */
+.search-backdrop {
+    display: none;
+}
+
+html.search-open {
+    overflow: hidden;
+}
+
+html.search-open .search-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: color-mix(in srgb, #000 45%, transparent);
+    backdrop-filter: blur(2px);
+}
+
+html.search-open #search-wrapper,
+html.search-open #mdbook-search-wrapper {
+    position: fixed;
+    top: 12vh;
+    left: 50%;
+    z-index: 201;
+    box-sizing: border-box;
+    width: min(680px, calc(100vw - 32px));
+    max-height: 72vh;
+    overflow-y: auto;
+    padding: 16px;
+    transform: translateX(-50%);
+    border: 1px solid color-mix(in srgb, var(--fg) 15%, transparent);
+    border-radius: 12px;
+    background: var(--bg);
+    box-shadow: 0 16px 48px color-mix(in srgb, #000 30%, transparent);
+}
+
+html.search-open .searchbar-outer,
+html.search-open .searchresults-outer {
+    max-width: none;
+    margin: 0;
+}
+
+html.search-open .searchresults-outer {
+    border-bottom: 0;
+}
+
+/* Search results: an icon of the kind of the result, the heading found in
+   bold, the path of its page under it; the teaser is hidden. */
+ul#searchresults li,
+ul#mdbook-searchresults li {
+    margin: 2px 0;
+    padding: 0;
+    border-radius: 8px;
+}
+
+ul#searchresults li > a,
+ul#mdbook-searchresults li > a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+}
+
+ul#searchresults li > a:hover,
+ul#mdbook-searchresults li > a:hover,
+ul#searchresults li.focus > a,
+ul#mdbook-searchresults li.focus > a {
+    background: color-mix(in srgb, var(--fg) 7%, transparent);
+}
+
+ul#searchresults span.teaser,
+ul#mdbook-searchresults span.teaser {
+    display: none;
+}
+
+.sr-icon {
+    display: inline-flex;
+    flex: none;
+    color: color-mix(in srgb, var(--fg) 55%, transparent);
+}
+
+.sr-icon svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sr-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sr-title {
+    font-weight: 600;
+    color: var(--fg);
+}
+
+.sr-path {
+    font-size: 0.85em;
+    color: color-mix(in srgb, var(--fg) 55%, transparent);
+}
+
+/* No highlight of the words searched on the page opened from a search: the
+   result links no longer ask for it, and a link that still does, such as
+   one shared before, marks nothing visible. mark.js tags its marks. */
+mark[data-markjs] {
+    background: none;
+    color: inherit;
 }
