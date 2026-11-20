@@ -11,6 +11,7 @@
 
 **Supported keywords:**
 
+- apparmor_profile
 - blocking_post_provision
 - blocking_post_start
 - blocking_post_stop
@@ -105,6 +106,36 @@
 - utsns
 - uxgrant
 - volume_mounts
+
+## Keyword `apparmor_profile`
+
+	required:    false
+	scopable:    true
+	group:       isolation
+	rbac:        Requires the root grant.
+
+**Example:**
+
+	apparmor_profile=unconfined
+
+**Description:**
+
+The apparmor profile the processes of the container run under, instead of
+the default profile of the engine (docker-default for docker,
+containers-default for podman): the name of a profile loaded on the node, or
+unconfined.
+
+The default profiles of docker and podman deny the processes of a container
+signalling one another when the kernel stacks the profile, as Ubuntu 26.04
+does with kernel.apparmor_restrict_unprivileged_unconfined=1 (moby/moby
+issue 54099): a master process can not stop its workers, as haproxy on a
+reload. A profile allowing those signals, or unconfined, works around it.
+
+Scopable, for the nodes needing it only. Without apparmor on the node, the
+engine ignores the profile.
+
+Setting it requires the root grant.
+
 
 ## Keyword `blocking_post_provision`
 
@@ -742,7 +773,9 @@ assigned.
   `--net <network>` or `--network <network>`, replaces it. The ports `run_args` publishes, as
   `-p 2222:22`, are published on an engine network only: the engines
   discard them in a private netns. The `expose` keyword makes SRV records,
-  and publishes nothing.
+  and publishes nothing. To forward a port of the node to the address an
+  `ip.netns` or `ip.cni` resource plumbs in the netns, whatever the engine,
+  set the `publish` keyword of that resource, as `publish = 25489:80/tcp`.
 
   The ip of an om network, by an `ip.netns` resource, is not supported in a
   container joined to an engine network: the netns would keep the default

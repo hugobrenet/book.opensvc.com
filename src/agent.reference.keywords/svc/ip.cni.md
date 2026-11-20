@@ -51,6 +51,7 @@
 - pre_unprovision
 - provision
 - provision_requires
+- publish
 - restart
 - restart_delay
 - shared
@@ -270,14 +271,29 @@ Set to `true` to ignore this resource in the nodes context and consider it in th
 
 **Example:**
 
-	expose=443/tcp:8443 53/udp
+	expose=8443:443/tcp 53/udp
 
 **Description:**
 
-A whitespace-separated list of `<port>/<protocol>[:<host port>]` describing
-socket services that mandate a SRV exposition.
+A whitespace-separated list of socket services the cluster DNS serves a SRV
+record of, each written as a `publish` declaration is,
+`[<frontend port>:]<port>[/<proto>]`:
 
-If `<host port>` is set, the `ip.cni` driver configures the port mappings.
+* `<port>` is the port the address serves.
+* `<frontend port>` is the port the record is named after,
+  `_<frontend port>._<proto>.<object fqdn>`, the port itself when not set. A
+  service name, as `http`, is accepted.
+* `<proto>` is `tcp`, the default, `tcp4`, `tcp6`, `udp`, `udp4` or `udp6`.
+
+The former form, `<port>/<proto>[:<frontend port>]`, as `443/tcp:8443`, is
+still read, and makes the same record as `8443:443/tcp`.
+
+It makes the records only, and forwards no port: the `publish` keyword
+forwards the ports of the node to the address.
+
+Unset, the ports `publish` forwards are exposed, each as
+`<host port>:<port>/<proto>`. Set, it replaces them, and `none` exposes
+nothing.
 
 
 ## Keyword `monitor`
@@ -836,6 +852,94 @@ action.
 A condition is expressed as `<rid>(<state>,...)`.
 
 If states are omitted, `up,stdby up` is used as the default expected states.
+
+
+## Keyword `publish`
+
+	required:    false
+	scopable:    true
+	group:       publish
+	stop first:  a change is refused while the resource is up
+	convert:     list
+	rbac:        A publish naming a port or an address of the node requires the root grant.
+
+**Example:**
+
+	publish=25489:80/tcp 192.168.1.10:8443:443/tcp
+
+**Description:**
+
+A whitespace-separated list of ports of the node forwarded to ports of the
+address, each written `[<host addr>:][<host port>:]<port>[/<proto>]`:
+
+* `<host port>` is the port of the node the clients connect to. Without it,
+  a free port of the node is drawn when the resource starts: `80/tcp`, or
+  `10.0.0.5::80` on one address of the node.
+* `<port>` is the port of the address the connections are forwarded to.
+* `<proto>` is `tcp`, the default, or `udp`.
+* `<host addr>` restricts the forwarding to the connections made to that
+  address of the node, an ipv6 one written in brackets, as
+  `[fd00::5]:8443:443`. Without it, the port is forwarded on every address
+  of the node.
+
+For example, `publish = 25489:80/tcp` forwards the port 25489 of the node to
+the port 80 of the address, where a nginx of the namespace listens. A port
+not listed, as the 3000 of a backend the nginx proxies to, is not forwarded:
+it is reached from the namespace, and from the hosts routing to the address.
+
+A drawn port is kept while the resource runs, a start of the resource
+already up included, and released when it stops: the next start, as the
+one of a failover, may draw another. The status of the resource reports the
+publishes with the ports drawn, and the cluster DNS serves them.
+
+Every published port is exposed: the cluster DNS serves its SRV record as
+the `expose` keyword would for `<host port>:<port>/<proto>`, as
+`_25489._tcp.<object fqdn>` for `25489:80/tcp`. An `expose` keyword set
+replaces the published ports, and `expose = none` exposes nothing.
+
+The forwarding is done by the node, with the nftables rules of the
+`osvc-publish` table, against the address the resource plumbed. No option of
+a container engine is involved, so it works the same whatever runs in the
+namespace: docker, podman, lxc, a containerd or runc container joining the
+namespace of an `ip.cni` resource, or a process of an `app` resource.
+
+The rules are added when the resource starts and removed when it stops. A
+change or a removal of the keyword is refused while the resource is up: it
+is stopped first. A
+start is refused when:
+
+* the node does not forward the packets of the family of the address:
+  `net.ipv4.ip_forward`, or `net.ipv6.conf.all.forwarding`, is to be set to
+  `1` by the administrator, om never sets it: `sysctl -w
+  net.ipv4.ip_forward=1`, and a file of `/etc/sysctl.d` to keep it at boot.
+* another resource of the node already publishes the port of the node.
+* the mode is one the node can not reach the address in, on a network
+  other than `lan`: `macvlan`, `ipvlan-l2`, `ipvlan-l3`, `ipvlan-l3s` and
+  `dedicated`.
+
+On a `lan` network, the publishes are ignored, whatever the mode: the
+address is on the segment of its clients, which reach it directly. The
+resource starts all the same, and its status says so in an info line.
+
+The status warns when the rules of the resource are expected and not
+loaded, a rule per publish, or when the node no longer forwards.
+
+Nothing keeps a process of the node from binding a published port later, a
+drawn one included: the forwarding then takes the connections that process
+waits for, except on its loopback addresses. The status warns of a port of
+the node a socket of the node also holds, of the family of the address: the
+ipv6 wildcard, dual stack by default, counts for both families.
+
+The port is forwarded for the clients connecting to an address of the node
+other than a loopback one: `127.0.0.1:<host port>` is not forwarded.
+
+A declaration naming a port or an address of the node requires the root
+grant, the ports and the addresses of the node being the node
+administrator's to hand out. One naming neither, as `80/tcp`, its port of
+the node drawn free, is open to the namespace administrators.
+
+The nodes of a service setting this keyword are all to run an agent knowing
+it: an older one ignores it, and starts the service with no port forwarded.
 
 
 ## Keyword `restart`

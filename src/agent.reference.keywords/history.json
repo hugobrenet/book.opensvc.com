@@ -10798,6 +10798,19 @@
    "since": "v3.0.0-rc36",
    "until": null
   },
+  "svc/container.docker.apparmor_profile": {
+   "changes": {},
+   "properties": {
+    "inherit": "leaf2head",
+    "scopable": true,
+    "textSum": "e3f3e814d82fcca2",
+    "types": [
+     "docker"
+    ]
+   },
+   "since": "v3.0.0-rc68",
+   "until": null
+  },
   "svc/container.docker.blocking_post_provision": {
    "changes": {},
    "properties": {
@@ -11247,6 +11260,9 @@
     ],
     "v3.0.0-rc64": [
      "candidates: unset -> , host, none"
+    ],
+    "v3.0.0-rc68": [
+     "description rewritten"
     ]
    },
    "properties": {
@@ -11260,7 +11276,7 @@
     ],
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "c7eda63878088863",
+    "textSum": "58a83999852d4ed2",
     "types": [
      "docker"
     ]
@@ -13492,6 +13508,19 @@
    "since": "v3.0.0-rc36",
    "until": null
   },
+  "svc/container.oci.apparmor_profile": {
+   "changes": {},
+   "properties": {
+    "inherit": "leaf2head",
+    "scopable": true,
+    "textSum": "e3f3e814d82fcca2",
+    "types": [
+     "oci"
+    ]
+   },
+   "since": "v3.0.0-rc68",
+   "until": null
+  },
   "svc/container.oci.blocking_post_provision": {
    "changes": {},
    "properties": {
@@ -13941,6 +13970,9 @@
     ],
     "v3.0.0-rc64": [
      "candidates: unset -> , host, none"
+    ],
+    "v3.0.0-rc68": [
+     "description rewritten"
     ]
    },
    "properties": {
@@ -13954,7 +13986,7 @@
     ],
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "c7eda63878088863",
+    "textSum": "58a83999852d4ed2",
     "types": [
      "oci"
     ]
@@ -14659,6 +14691,19 @@
    "since": "v3.0.0-rc36",
    "until": null
   },
+  "svc/container.podman.apparmor_profile": {
+   "changes": {},
+   "properties": {
+    "inherit": "leaf2head",
+    "scopable": true,
+    "textSum": "e3f3e814d82fcca2",
+    "types": [
+     "podman"
+    ]
+   },
+   "since": "v3.0.0-rc68",
+   "until": null
+  },
   "svc/container.podman.blocking_post_provision": {
    "changes": {},
    "properties": {
@@ -15108,6 +15153,9 @@
     ],
     "v3.0.0-rc64": [
      "candidates: unset -> , host, none"
+    ],
+    "v3.0.0-rc68": [
+     "description rewritten"
     ]
    },
    "properties": {
@@ -15121,7 +15169,7 @@
     ],
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "c7eda63878088863",
+    "textSum": "58a83999852d4ed2",
     "types": [
      "podman"
     ]
@@ -65297,12 +65345,16 @@
    "until": null
   },
   "svc/ip.cni.expose": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc68": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "list",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "bf3aaad3ddc55c58",
+    "textSum": "30c36d6bcc417765",
     "types": [
      "cni"
     ]
@@ -65512,6 +65564,20 @@
     ]
    },
    "since": "v3.0.0-rc36",
+   "until": null
+  },
+  "svc/ip.cni.publish": {
+   "changes": {},
+   "properties": {
+    "converter": "list",
+    "inherit": "leaf2head",
+    "scopable": true,
+    "textSum": "6e2c26eb89c4d2ca",
+    "types": [
+     "cni"
+    ]
+   },
+   "since": "v3.0.0-rc68",
    "until": null
   },
   "svc/ip.cni.restart": {
@@ -65893,12 +65959,16 @@
    "until": null
   },
   "svc/ip.docker.expose": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc68": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "list",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "7c1adc739aab9349",
+    "textSum": "30c36d6bcc417765",
     "types": [
      "docker"
     ]
@@ -66203,6 +66273,20 @@
     ]
    },
    "since": "v3.0.0-rc36",
+   "until": null
+  },
+  "svc/ip.docker.publish": {
+   "changes": {},
+   "properties": {
+    "converter": "list",
+    "inherit": "leaf2head",
+    "scopable": true,
+    "textSum": "6e2c26eb89c4d2ca",
+    "types": [
+     "docker"
+    ]
+   },
+   "since": "v3.0.0-rc68",
    "until": null
   },
   "svc/ip.docker.restart": {
@@ -66603,12 +66687,16 @@
    "until": null
   },
   "svc/ip.host.expose": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc68": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "list",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "7c1adc739aab9349",
+    "textSum": "32ad7f05a4c75635",
     "types": [
      "host"
     ]
@@ -67223,12 +67311,16 @@
    "until": null
   },
   "svc/ip.netns.expose": {
-   "changes": {},
+   "changes": {
+    "v3.0.0-rc68": [
+     "description rewritten"
+    ]
+   },
    "properties": {
     "converter": "list",
     "inherit": "leaf2head",
     "scopable": true,
-    "textSum": "7c1adc739aab9349",
+    "textSum": "30c36d6bcc417765",
     "types": [
      "netns"
     ]
@@ -67533,6 +67625,20 @@
     ]
    },
    "since": "v3.0.0-rc36",
+   "until": null
+  },
+  "svc/ip.netns.publish": {
+   "changes": {},
+   "properties": {
+    "converter": "list",
+    "inherit": "leaf2head",
+    "scopable": true,
+    "textSum": "6e2c26eb89c4d2ca",
+    "types": [
+     "netns"
+    ]
+   },
+   "since": "v3.0.0-rc68",
    "until": null
   },
   "svc/ip.netns.restart": {
@@ -138387,6 +138493,7 @@
   "v3.0.0-rc62",
   "v3.0.0-rc64",
   "v3.0.0-rc66",
-  "v3.0.0-rc67"
+  "v3.0.0-rc67",
+  "v3.0.0-rc68"
  ]
 }

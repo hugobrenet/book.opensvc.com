@@ -1,9 +1,38 @@
 # Keyword changes
 
-What each release of the agent added, removed and changed in its keywords. The reference itself documents v3.0.0-rc67.
+What each release of the agent added, removed and changed in its keywords. The reference itself documents v3.0.0-rc68.
 
 The 20 most recent releases are listed. The whole timeline is in `history.json`, beside this page.
 
+
+## v3.0.0-rc68
+
+
+### Added
+
+- `svc/container.docker.apparmor_profile`
+- `svc/container.oci.apparmor_profile`
+- `svc/container.podman.apparmor_profile`
+- `svc/ip.cni.publish`
+- `svc/ip.docker.publish`
+- `svc/ip.netns.publish`
+
+### Changed
+
+- `svc/container.docker.netns`
+  - description rewritten
+- `svc/container.oci.netns`
+  - description rewritten
+- `svc/container.podman.netns`
+  - description rewritten
+- `svc/ip.cni.expose`
+  - description rewritten
+- `svc/ip.docker.expose`
+  - description rewritten
+- `svc/ip.host.expose`
+  - description rewritten
+- `svc/ip.netns.expose`
+  - description rewritten
 
 ## v3.0.0-rc67
 
@@ -8114,12 +8143,4 @@ No keyword changed.
 - `svc/task.oci.userns`
   - description rewritten
 - `vol/task.oci.userns`
-  - description rewritten
-
-## v3.0.0-rc40
-
-
-### Changed
-
-- `svc/DEFAULT.orchestrate`
   - description rewritten

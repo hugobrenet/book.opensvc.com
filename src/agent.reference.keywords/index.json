@@ -5457,6 +5457,14 @@
     "simple"
    ]
   },
+  "svc/container.docker.apparmor_profile": {
+   "inherit": "leaf2head",
+   "scopable": true,
+   "textSum": "e3f3e814d82fcca2",
+   "types": [
+    "docker"
+   ]
+  },
   "svc/container.docker.blocking_post_provision": {
    "inherit": "leaf2head",
    "scopable": true,
@@ -5745,7 +5753,7 @@
    ],
    "inherit": "leaf2head",
    "scopable": true,
-   "textSum": "c7eda63878088863",
+   "textSum": "58a83999852d4ed2",
    "types": [
     "docker"
    ]
@@ -7120,6 +7128,14 @@
     "lxc"
    ]
   },
+  "svc/container.oci.apparmor_profile": {
+   "inherit": "leaf2head",
+   "scopable": true,
+   "textSum": "e3f3e814d82fcca2",
+   "types": [
+    "oci"
+   ]
+  },
   "svc/container.oci.blocking_post_provision": {
    "inherit": "leaf2head",
    "scopable": true,
@@ -7408,7 +7424,7 @@
    ],
    "inherit": "leaf2head",
    "scopable": true,
-   "textSum": "c7eda63878088863",
+   "textSum": "58a83999852d4ed2",
    "types": [
     "oci"
    ]
@@ -7824,6 +7840,14 @@
     "oci"
    ]
   },
+  "svc/container.podman.apparmor_profile": {
+   "inherit": "leaf2head",
+   "scopable": true,
+   "textSum": "e3f3e814d82fcca2",
+   "types": [
+    "podman"
+   ]
+  },
   "svc/container.podman.blocking_post_provision": {
    "inherit": "leaf2head",
    "scopable": true,
@@ -8112,7 +8136,7 @@
    ],
    "inherit": "leaf2head",
    "scopable": true,
-   "textSum": "c7eda63878088863",
+   "textSum": "58a83999852d4ed2",
    "types": [
     "podman"
    ]
@@ -37477,7 +37501,7 @@
    "converter": "list",
    "inherit": "leaf2head",
    "scopable": true,
-   "textSum": "bf3aaad3ddc55c58",
+   "textSum": "30c36d6bcc417765",
    "types": [
     "cni"
    ]
@@ -37607,6 +37631,15 @@
   "svc/ip.cni.provision_requires": {
    "inherit": "leaf2head",
    "textSum": "ad0a44ebe3fee9cd",
+   "types": [
+    "cni"
+   ]
+  },
+  "svc/ip.cni.publish": {
+   "converter": "list",
+   "inherit": "leaf2head",
+   "scopable": true,
+   "textSum": "6e2c26eb89c4d2ca",
    "types": [
     "cni"
    ]
@@ -37850,7 +37883,7 @@
    "converter": "list",
    "inherit": "leaf2head",
    "scopable": true,
-   "textSum": "7c1adc739aab9349",
+   "textSum": "30c36d6bcc417765",
    "types": [
     "docker"
    ]
@@ -38034,6 +38067,15 @@
   "svc/ip.docker.provision_requires": {
    "inherit": "leaf2head",
    "textSum": "ad0a44ebe3fee9cd",
+   "types": [
+    "docker"
+   ]
+  },
+  "svc/ip.docker.publish": {
+   "converter": "list",
+   "inherit": "leaf2head",
+   "scopable": true,
+   "textSum": "6e2c26eb89c4d2ca",
    "types": [
     "docker"
    ]
@@ -38286,7 +38328,7 @@
    "converter": "list",
    "inherit": "leaf2head",
    "scopable": true,
-   "textSum": "7c1adc739aab9349",
+   "textSum": "32ad7f05a4c75635",
    "types": [
     "host"
    ]
@@ -38665,7 +38707,7 @@
    "converter": "list",
    "inherit": "leaf2head",
    "scopable": true,
-   "textSum": "7c1adc739aab9349",
+   "textSum": "30c36d6bcc417765",
    "types": [
     "netns"
    ]
@@ -38849,6 +38891,15 @@
   "svc/ip.netns.provision_requires": {
    "inherit": "leaf2head",
    "textSum": "ad0a44ebe3fee9cd",
+   "types": [
+    "netns"
+   ]
+  },
+  "svc/ip.netns.publish": {
+   "converter": "list",
+   "inherit": "leaf2head",
+   "scopable": true,
+   "textSum": "6e2c26eb89c4d2ca",
    "types": [
     "netns"
    ]
@@ -80756,5 +80807,5 @@
    ]
   }
  },
- "version": "v3.0.0-rc67"
+ "version": "v3.0.0-rc68"
 }
