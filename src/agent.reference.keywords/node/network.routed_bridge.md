@@ -107,7 +107,14 @@ each, in the order of its ip resources.
 
 **Description:**
 
-The gateway to use to reach the network segment of the node specified as scope.
+The address the other nodes reach the node specified as scope at, as
+`gateway@n2 = 10.0.0.2`: the gateway of their routes to its subnet, and the
+remote endpoint of their tunnels to it. An address, or a name resolved in
+the address family of the network, out of the network itself.
+
+Not set, the address of the node: its `addr`, else the address its name
+resolves to. Set it when the other nodes reach the node at an address other
+than the one it sends from, as through a router or a NAT.
 
 
 ## Keyword `ips_per_node`
@@ -255,7 +262,7 @@ The ip tunnel mode. gre can tunnel mcast ip and ipv6 at the price of a 24B heade
 	required:    false
 	scopable:    false
 	group:       identity
-	candidates:  bridge, routed_bridge, lan
+	candidates:  bridge, routed_bridge, lan, l2_bridge
 	default:     bridge
 
 **Description:**
@@ -269,8 +276,12 @@ The type of network.
 * `lan`: ranges of a segment the nodes share, the addresses of which an
   object takes along when it moves to another node, as the floating address
   of a failover service.
+* `l2_bridge`: a bridge on each node with no address, for the guests and
+  containers of the node to share a segment om neither addresses nor
+  routes. Alone on its node, or meshed with the bridges of the other nodes
+  through a lan or vlan they share (`ports`), or a vxlan (`vxlan_vni`).
 
-The traffic the nodes forward for the `bridge` and `routed_bridge` networks
+The traffic the nodes forward for the `bridge`, `routed_bridge` and `l2_bridge` networks
 is accepted in the om nft table, and, on a node running docker, whose
 forward chain drops what docker did not accept, in a chain the docker
 `DOCKER-USER` chain jumps to.

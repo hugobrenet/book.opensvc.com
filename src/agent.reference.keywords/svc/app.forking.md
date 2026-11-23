@@ -26,6 +26,7 @@
 - blocking_pre_start
 - blocking_pre_stop
 - blocking_pre_unprovision
+- capability_bounding_set
 - check
 - check_timeout
 - comment
@@ -51,6 +52,7 @@
 - limit_vmem
 - monitor
 - netns
+- no_new_privileges
 - optional
 - pg_blkio_weight
 - pg_cpu_burst
@@ -92,6 +94,7 @@
 - stop_requires
 - stop_timeout
 - subset
+- systemd_properties
 - tags
 - timeout
 - type
@@ -214,6 +217,35 @@ Errors interrupt the action.
 A command or script to execute before the resource `unprovision` action.
 
 Errors interrupt the action.
+
+
+## Keyword `capability_bounding_set`
+
+	required:    false
+	scopable:    true
+	group:       process
+	rbac:        This driver group requires the root grant.
+
+**Example:**
+
+	capability_bounding_set=CAP_NET_BIND_SERVICE CAP_CHOWN
+
+**Description:**
+
+The capabilities the commands of the resource keep in their bounding set,
+all others dropped: a process can never gain a capability out of its
+bounding set, by a setuid root program or file capabilities included, and
+a command run as root only has the capabilities listed. Prefixed with `~`,
+the list is of the capabilities dropped, all others kept, as the
+`CapabilityBoundingSet` of systemd.
+
+The names are the Linux ones, as `CAP_NET_BIND_SERVICE`, in any case. An
+unknown name is refused by the validation. The capabilities dropped are
+removed from the inheritable set too. Applied by om exec before the
+demotion to the user, which still works, and inherited by the children of
+the command. Not set, the commands keep the bounding set of the daemon.
+
+Refused on an operating system other than Linux, rather than ignored.
 
 
 ## Keyword `check`
@@ -729,6 +761,28 @@ For example a service with a cni-type `ip#0` resource that doesn't set a `netns`
 A app#0 resource can use this netns by setting `app#0.netns=ip#0`.
 
 The starter program is executed via `ip netns exec`.
+
+
+## Keyword `no_new_privileges`
+
+	required:    false
+	scopable:    true
+	group:       process
+	rbac:        This driver group requires the root grant.
+
+**Example:**
+
+	no_new_privileges=true
+
+**Description:**
+
+Set the no_new_privs flag of the commands of the resource: neither the
+process nor its children can gain privileges by executing a setuid or
+setgid program, or a program with file capabilities. Applied by om exec
+after the user and the limits, just before the command is executed. The
+flag can not be lowered by the process.
+
+Refused on an operating system other than Linux, rather than ignored.
 
 
 ## Keyword `optional`
@@ -1667,6 +1721,53 @@ or in a less precise `[subset#<name>]` one.
 That section accepts `parallel`, to act on the members concurrently rather than
 one after the other, and the `pg_*` keywords, to place the members in their own
 process group.
+
+
+## Keyword `systemd_properties`
+
+	required:    false
+	scopable:    true
+	group:       process
+	rbac:        This driver group requires the root grant.
+
+**Example:**
+
+	systemd_properties=ProtectSystem=strict ReadWritePaths=/srv/app/data PrivateTmp=yes ProtectHome=yes
+
+**Description:**
+
+The properties of the transient systemd service unit the start command, or
+the run command of a task, is run in, as `systemd-run -p` takes them: the
+sandbox of the command, as `ProtectSystem=strict ReadWritePaths=/srv/data
+PrivateTmp=yes`. A word starting with a property name and `=` starts a
+property, and the words after it, up to the next property, are its value,
+so a list of paths needs no quotes. Quote a value with blanks a property
+does not split. Not set, the command runs in no unit.
+
+The unit is named after the process group of the resource, as
+`opensvc-ns.prod-svc.web-app.main.service`, and placed in it: the
+`pg_*` cappings apply to it. Its command is om exec, which sets the user,
+the group, the umask, the limits, `capability_bounding_set` and
+`no_new_privileges` as without a unit, inside the sandbox. The environment
+is given to the unit in a file only root reads, not as properties every
+user sees. The check, info, stop, quiesce and resume commands run in the
+namespaces of the unit while it runs, so they see the files the command
+sees, as its private `/tmp`.
+
+The unit is ordered before the om daemon, and never stopped by a stop
+job: the stop of the resource ends its processes, and the unit with them,
+so a reboot stops the resource with the object, in order, before systemd
+stops what is left. A property systemd does not know fails the start,
+never running the command unsandboxed. So does a node not running systemd.
+
+The properties om sets itself are refused: the type, the command, the
+identity, the environment, the slice, the dependencies and ordering, the
+restarts, the timeouts, the limits, `KillMode`, `NoNewPrivileges` and
+`CapabilityBoundingSet`, whose keywords om exec applies.
+
+To share properties between resources, set them in a key of the `env`
+section and reference it, as `systemd_properties = {env.sandbox}
+ReadWritePaths=/srv/data`.
 
 
 ## Keyword `tags`

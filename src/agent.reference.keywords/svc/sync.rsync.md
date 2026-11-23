@@ -17,6 +17,7 @@
 - blocking_pre_unprovision
 - bwlimit
 - comment
+- delay_snap
 - disable
 - dst
 - dstfs
@@ -150,6 +151,27 @@ configuration as a whole, and a resource, pool, heartbeat, array or network
 section can document itself.
 
 The agent does not interpret the value.
+
+
+## Keyword `delay_snap`
+
+	required:    false
+	scopable:    false
+	group:       transfer
+	convert:     bool
+	rbac:        Requires the root grant.
+
+**Description:**
+
+If `true`, with `snap`, the update or full of this resource takes its
+snapshot just before its own transfer and removes it right after, rather
+than take it with the snapshots of the other sync resources of the action,
+at one moment before the first transfer. Its copy is then of another point
+in time than theirs, and taken with no quiesce.
+
+Set it for a resource whose data is independent of the others, or whose
+thick volume has no room to hold the writes of a snapshot for the whole
+action.
 
 
 ## Keyword `disable`
@@ -840,7 +862,22 @@ A filesystem mounted below `src` is not in the snapshot: the update is
 refused unless the rsync options keep the copy on one filesystem, as the
 default `-x` does.
 
-The snapshots are removed when the update ends, whether it succeeded or not.
+The snapshots of all the sync resources of an update or a full action are
+taken at one moment, before the first transfer, under a quiesce of the
+resources of the object that quiesce, as the apps and containers setting
+`quiesce`: the copies are of the same point in time, as the data of an
+application spread over filesystems has to be. They are the snapshots of the
+sync.rsync resources setting `snap`, removed after the last transfer, the
+ones the sync.zfs and sync.btrfs resources send, and the ones the
+sync.zfssnap and sync.btrfssnap resources keep. A sync.store resource is not
+of them: its backup takes its own, under a quiesce of its own.
+
+`delay_snap` has a resource take its snapshot just before its own transfer
+instead. A thick volume holds the writes of its snapshot for the whole
+action then, not only for its own transfer: give it the room, use a thin
+volume, or set `delay_snap`.
+
+The snapshots are removed when the action ends, whether it succeeded or not.
 An update interrupted before it removed them leaves them to the next one,
 and the resource status says so meanwhile.
 

@@ -20,6 +20,7 @@
 - blocking_pre_unprovision
 - comment
 - dataset
+- delay_snap
 - disable
 - encap
 - keep
@@ -151,6 +152,33 @@ The agent does not interpret the value.
 **Description:**
 
 A whitespace separated list of datasets to snapshot.
+
+The snapshots are taken at the start of the update, before the first
+transfer of the sync resources updated with this one, at the moment they
+take theirs, under a quiesce of the resources of the object that quiesce: a
+`sync.zfs` resource of the same update sends them with its own, as its
+`intermediary` keyword, set by default, has it send the snapshots taken since
+its last update.
+
+
+## Keyword `delay_snap`
+
+	required:    false
+	scopable:    true
+	group:       snapshots
+	convert:     bool
+	rbac:        Requires the root grant.
+
+**Description:**
+
+If `true`, the update of this resource takes its snapshots in its own
+update, with no quiesce, rather than with the snapshots of the other sync
+resources of the action, at one moment before the first transfer, under a
+quiesce of the object.
+
+Set it for a resource scheduled on its own, often, as hourly snapshots,
+whose apps and containers setting `quiesce` are not to be paused at each,
+or whose datasets are independent of the data the other syncs copy.
 
 
 ## Keyword `disable`

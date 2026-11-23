@@ -21,6 +21,7 @@
 - blocking_pre_provision
 - blocking_pre_unprovision
 - comment
+- delay_snap
 - disable
 - dst
 - encap
@@ -138,6 +139,27 @@ configuration as a whole, and a resource, pool, heartbeat, array or network
 section can document itself.
 
 The agent does not interpret the value.
+
+
+## Keyword `delay_snap`
+
+	required:    false
+	scopable:    true
+	group:       transfer
+	convert:     bool
+	rbac:        Requires the root grant.
+
+**Description:**
+
+If `true`, the update or full of this resource takes the snapshots it sends
+just before its own transfer, rather than take them with the snapshots of
+the other sync resources of the action, at one moment before the first
+transfer. Its copy is then of another point in time than theirs, and taken
+with no quiesce.
+
+Set it for a subvolume whose data is independent of the others, or has to be
+sent as late as possible, as the archived logs of a database, which are
+complete only once the datafiles are copied.
 
 
 ## Keyword `disable`

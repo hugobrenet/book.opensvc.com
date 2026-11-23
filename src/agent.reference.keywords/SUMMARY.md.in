@@ -1,4 +1,4 @@
-# Agent Keywords Reference (v3.0.0-rc70)
+# Agent Keywords Reference (v3.0.0-rc71)
 
 - [Keyword changes](agent.reference.keywords/changes.md)
 - [Removed keywords](agent.reference.keywords/removed.md)
@@ -29,6 +29,7 @@
   - [hook](agent.reference.keywords/node/hook.md)
   - [listener](agent.reference.keywords/node/listener.md)
   - [network.bridge](agent.reference.keywords/node/network.bridge.md)
+  - [network.l2_bridge](agent.reference.keywords/node/network.l2_bridge.md)
   - [network.lan](agent.reference.keywords/node/network.lan.md)
   - [network.lo](agent.reference.keywords/node/network.lo.md)
   - [network.routed_bridge](agent.reference.keywords/node/network.routed_bridge.md)
@@ -81,6 +82,7 @@
   - [hook](agent.reference.keywords/cluster/hook.md)
   - [listener](agent.reference.keywords/cluster/listener.md)
   - [network.bridge](agent.reference.keywords/cluster/network.bridge.md)
+  - [network.l2_bridge](agent.reference.keywords/cluster/network.l2_bridge.md)
   - [network.lan](agent.reference.keywords/cluster/network.lan.md)
   - [network.lo](agent.reference.keywords/cluster/network.lo.md)
   - [network.routed_bridge](agent.reference.keywords/cluster/network.routed_bridge.md)

@@ -19,6 +19,7 @@
 - blocking_pre_provision
 - blocking_pre_unprovision
 - comment
+- delay_snap
 - disable
 - encap
 - keep
@@ -134,6 +135,26 @@ configuration as a whole, and a resource, pool, heartbeat, array or network
 section can document itself.
 
 The agent does not interpret the value.
+
+
+## Keyword `delay_snap`
+
+	required:    false
+	scopable:    true
+	group:       snapshots
+	convert:     bool
+	rbac:        Requires the root grant.
+
+**Description:**
+
+If `true`, the update of this resource takes its snapshots in its own
+update, with no quiesce, rather than with the snapshots of the other sync
+resources of the action, at one moment before the first transfer, under a
+quiesce of the object.
+
+Set it for a resource scheduled on its own, often, as hourly snapshots,
+whose apps and containers setting `quiesce` are not to be paused at each,
+or whose subvolumes are independent of the data the other syncs copy.
 
 
 ## Keyword `disable`
@@ -844,6 +865,8 @@ process group.
 A whitespace separated list of `<label>:<subvol>` to snapshot.
 
 `<label>` is the label of the btrfs filesystem, and `<subvol>` the path of the subvolume from the root of the filesystem. Reference the `fs.btrfs` resource mounting it rather than repeating its values, as `{fs#1.label}:{fs#1.subvol}`. The snapshots are taken where the subvolume is mounted, in its `.snap` directory: a subvolume not mounted is not snapshotted.
+
+The snapshots are taken at the start of the update, before the first transfer of the sync resources updated with this one, at the moment they take theirs, under a quiesce of the resources of the object that quiesce.
 
 
 ## Keyword `tags`
