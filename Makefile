@@ -119,10 +119,11 @@ serve: summary
 	mdbook serve --open
 
 # test runs the tests of tools/llmstxt.py and tools/searchindex.py, on a book
-# of a few pages, and those of the search engine, theme/search.js, with node.
+# of a few pages, and those of the search engine, theme/search.js, and of
+# what theme/content.js reads in a page, with node.
 test:
 	python3 -B -m unittest tools/llmstxt_test.py tools/searchindex_test.py
-	node --test tools/search_test.js
+	node --test tools/search_test.js tools/content_test.js
 
 # search-test runs the searches the search must answer well, on the index of
 # the book built: see tools/search_queries.json.

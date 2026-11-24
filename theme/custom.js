@@ -358,8 +358,154 @@
   head.appendChild(top);
   head.appendChild(search);
   sections(head);
+  parts();
+  here();
   sidebar.insertBefore(head, scrollbox);
   sidebar.classList.add("sidebar-with-head");
+
+  // The link of the page read does not load it again: it takes the reader
+  // back to its top, and, on a screen too narrow to keep the sidebar open,
+  // closes the sidebar as a page loaded would. A click to open it in another
+  // tab or window is left to the browser.
+  function here() {
+    function path(pathname) {
+      return decodeURIComponent(pathname).replace(/\/index\.html$/, "/");
+    }
+    scrollbox.addEventListener("click", function (event) {
+      var link = event.target.closest("a[href]");
+      if (!link || event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
+        return;
+      }
+      if (link.origin !== window.location.origin || path(link.pathname) !== path(window.location.pathname)) {
+        return;
+      }
+      if (link.hash && link.hash !== window.location.hash) {
+        return;
+      }
+      event.preventDefault();
+      var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
+      if (window.location.hash) {
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+      var toggle = document.getElementById("mdbook-sidebar-toggle-anchor") || document.getElementById("sidebar-toggle-anchor");
+      if (toggle && toggle.checked && !window.matchMedia("(min-width: 1080px)").matches) {
+        toggle.checked = false;
+        toggle.dispatchEvent(new Event("change"));
+      }
+    });
+  }
+
+  // The parts of the summary, Get Started, Agent, Apps..., each with an icon
+  // before its title, and their pages aligned on the title, under it: a part
+  // stands apart from its pages by more than the weight of its name. A part
+  // the list does not know has the icon of a folder.
+  //
+  // A part folds and unfolds its pages when its title, a button, is clicked,
+  // or when Enter or Space is pressed on it, a chevron telling which.
+  // The parts folded are remembered from a page to the next, by their names,
+  // the release the keyword reference names left out; the part of the page
+  // read opens unfolded.
+  function parts() {
+    var ICONS = [
+      [/^Get Started\b/, '<path d="M9.5 2.5c2-1 4-1 4-1s0 2-1 4l-4 4-3-3zM6.5 6.5 4 6.2 2.2 8l3 .6M9.5 9.5l.3 2.5L8 13.8l-.6-3M4.6 11.4c-1 .5-1.6 2.1-1.6 2.1s1.6-.6 2.1-1.6"/><circle cx="10.6" cy="5.4" r=".9"/>'],
+      [/^Agent Keywords Reference\b/, '<circle cx="5.5" cy="10.5" r="3"/><path d="M7.6 8.4 14 2M11.5 4.5l1.5 1.5M10 6l1.5 1.5"/>'],
+      [/^Agent\b/, '<rect x="2" y="2.5" width="12" height="4.5" rx="1"/><rect x="2" y="9" width="12" height="4.5" rx="1"/><path d="M4.6 4.75h.01M4.6 11.25h.01"/>'],
+      [/^Apps\b/, '<path d="M8 1.75 13.75 5v6L8 14.25 2.25 11V5zM2.25 5 8 8.25 13.75 5M8 8.25v6"/>'],
+      [/^Dig\b/, '<rect x="4" y="4" width="8" height="8" rx="1"/><path d="M6 1.5V4M10 1.5V4M6 12v2.5M10 12v2.5M1.5 6H4M1.5 10H4M12 6h2.5M12 10h2.5"/>'],
+      [/^AI Assistant\b/, '<path d="M6.5 2l1.1 3.4L11 6.5 7.6 7.6 6.5 11 5.4 7.6 2 6.5l3.4-1.1zM12 9.5l.6 1.9 1.9.6-1.9.6-.6 1.9-.6-1.9-1.9-.6 1.9-.6z"/>'],
+      [/^HOWTOs\b/i, '<path d="M8 4C6.5 2.8 4.5 2.5 2 2.75v9.5c2.5-.25 4.5.05 6 1.25 1.5-1.2 3.5-1.5 6-1.25v-9.5C11.5 2.5 9.5 2.8 8 4zM8 4v9.5"/>'],
+      [/^Appendix\b/, '<path d="M10.5 5 6 9.5a1.4 1.4 0 0 0 2 2l5-5a2.8 2.8 0 0 0-4-4l-5 5a4.2 4.2 0 0 0 6 6l4-4"/>'],
+    ];
+    var FOLDER = '<path d="M2 4.5a1 1 0 0 1 1-1h3l1.5 1.5H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/>';
+    var titles = scrollbox.querySelectorAll("ol.chapter > li.part-title");
+    if (!titles.length) {
+      return;
+    }
+    Array.prototype.forEach.call(titles, function (item) {
+      var name = item.textContent.trim();
+      var icon = FOLDER;
+      ICONS.some(function (entry) {
+        if (entry[0].test(name)) {
+          icon = entry[1];
+          return true;
+        }
+        return false;
+      });
+      // The title is a button in the item of the list, which folds the part.
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "part-toggle";
+      button.innerHTML = '<svg class="part-icon" viewBox="0 0 16 16" aria-hidden="true">' + icon + "</svg>";
+      var label = document.createElement("span");
+      label.className = "part-name";
+      while (item.firstChild) {
+        label.appendChild(item.firstChild);
+      }
+      button.appendChild(label);
+      button.insertAdjacentHTML("beforeend", '<svg class="part-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>');
+      item.appendChild(button);
+    });
+    sidebar.classList.add("sidebar-with-part-icons");
+    folding(Array.prototype.slice.call(titles));
+  }
+
+  function folding(titles) {
+    var KEY = "opensvc.sidebar.folded";
+    function load() {
+      try {
+        var list = JSON.parse(window.localStorage.getItem(KEY));
+        return Array.isArray(list) ? list : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    function save(list) {
+      try {
+        window.localStorage.setItem(KEY, JSON.stringify(list));
+      } catch (e) {
+        /* a reader who blocks storage folds again */
+      }
+    }
+    // The pages of a part are the items after its title, to the next one.
+    function pages(title) {
+      var out = [];
+      for (var node = title.nextElementSibling; node && !node.classList.contains("part-title"); node = node.nextElementSibling) {
+        out.push(node);
+      }
+      return out;
+    }
+    function fold(title, folded) {
+      title.classList.toggle("part-folded", folded);
+      title.querySelector(".part-toggle").setAttribute("aria-expanded", String(!folded));
+      pages(title).forEach(function (node) {
+        node.classList.toggle("part-folded-page", folded);
+      });
+    }
+    var here = window.location.pathname.replace(/\/index\.html$/, "/");
+    var folded = load();
+    titles.forEach(function (title) {
+      var name = title.querySelector(".part-name").textContent.replace(/\s*\(.*\)\s*$/, "").trim();
+      var current = pages(title).some(function (node) {
+        return node.querySelector("a.active") || Array.prototype.some.call(node.querySelectorAll("a[href]"), function (a) {
+          return a.pathname.replace(/\/index\.html$/, "/") === here;
+        });
+      });
+      fold(title, folded.indexOf(name) >= 0 && !current);
+      function toggle() {
+        var now = !title.classList.contains("part-folded");
+        fold(title, now);
+        var list = load().filter(function (other) {
+          return other !== name;
+        });
+        if (now) {
+          list.push(name);
+        }
+        save(list);
+      }
+      title.querySelector(".part-toggle").addEventListener("click", toggle);
+    });
+  }
 
   // The sidebar shows one of two sections, the documentation or the keyword
   // reference, its part of the summary: picked under the search, and set
@@ -486,7 +632,9 @@
       item.className = "page-toc-" + heading.tagName.toLowerCase();
       var link = document.createElement("a");
       link.href = "#" + heading.id;
-      link.textContent = heading.textContent;
+      // A heading of the keyword reference is named by its name, without
+      // what it is, theme/content.js.
+      link.textContent = heading.dataset.tocLabel || heading.textContent;
       item.appendChild(link);
       list.appendChild(item);
       links.push(link);
@@ -622,6 +770,11 @@
     if (anchor) {
       anchor.checked = true;
     }
+    // mdbook hides the sidebar it found folded with display: none, which the
+    // checkbox alone does not undo.
+    if (sidebar) {
+      sidebar.style.display = "";
+    }
     document.documentElement.classList.remove("sidebar-hidden");
     document.documentElement.classList.add("sidebar-visible");
     if (sidebar) {
@@ -636,4 +789,114 @@
   }
   show();
   wide.addEventListener("change", show);
+})();
+
+// Back to top.
+//
+// A button at the bottom right of the screen takes the reader back to the top
+// of the page, once they read a screen below it: a long page, the pages of
+// the keyword reference above all, is otherwise climbed back by scrolling.
+// The focus goes to the title of the page, for the keys to read on from
+// there.
+(function () {
+  var button = document.createElement("button");
+  button.type = "button";
+  button.className = "back-to-top";
+  button.title = "Back to top";
+  button.setAttribute("aria-label", "Back to top");
+  button.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3M3.5 7.5 8 3l4.5 4.5"/></svg>';
+  document.body.appendChild(button);
+
+  var shown = false;
+  function update() {
+    var on = window.scrollY > window.innerHeight;
+    if (on !== shown) {
+      shown = on;
+      button.classList.toggle("back-to-top-shown", on);
+    }
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update);
+  update();
+
+  button.addEventListener("click", function () {
+    var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: still ? "auto" : "smooth" });
+    var title = document.querySelector(".content main h1");
+    if (title) {
+      title.setAttribute("tabindex", "-1");
+      title.focus({ preventScroll: true });
+    }
+  });
+})();
+
+// Prefetch.
+//
+// A page of the book is fetched while the reader is about to open it, when
+// the pointer rests on its link, a finger touches it or the keys focus it, so
+// it shows at once when the link is followed: the book is static, and each
+// page is loaded whole. Only the page is fetched, not its scripts, and none
+// runs: a page prefetched and never opened is not a page view.
+//
+// Chrome and Edge do it themselves, told by speculation rules which links
+// are the pages of the book. The other browsers are given a <link
+// rel=prefetch> for the page of the link, once.
+(function () {
+  var supports = window.HTMLScriptElement && HTMLScriptElement.supports && HTMLScriptElement.supports("speculationrules");
+  if (supports) {
+    var rules = document.createElement("script");
+    rules.type = "speculationrules";
+    rules.textContent = JSON.stringify({
+      prefetch: [{
+        source: "document",
+        where: { and: [{ href_matches: "/*.html" }, { not: { selector_matches: "[download], [target=_blank]" } }] },
+        eagerness: "moderate",
+      }],
+    });
+    document.head.appendChild(rules);
+    return;
+  }
+
+  var fetched = {};
+  var timer = null;
+
+  // page is the page a link opens, when it is another page of the book.
+  function page(link) {
+    if (!link || !link.href || link.hasAttribute("download") || link.origin !== window.location.origin) {
+      return null;
+    }
+    if (!/\.html$/.test(link.pathname) || link.pathname === window.location.pathname) {
+      return null;
+    }
+    return link.origin + link.pathname;
+  }
+
+  function prefetch(url) {
+    if (!url || fetched[url]) {
+      return;
+    }
+    fetched[url] = true;
+    var hint = document.createElement("link");
+    hint.rel = "prefetch";
+    hint.href = url;
+    document.head.appendChild(hint);
+  }
+
+  document.addEventListener("mouseover", function (event) {
+    var url = page(event.target.closest && event.target.closest("a[href]"));
+    clearTimeout(timer);
+    if (url) {
+      timer = setTimeout(function () {
+        prefetch(url);
+      }, 65);
+    }
+  }, { passive: true });
+  document.addEventListener("mouseout", function () {
+    clearTimeout(timer);
+  }, { passive: true });
+  ["touchstart", "focusin"].forEach(function (type) {
+    document.addEventListener(type, function (event) {
+      prefetch(page(event.target.closest && event.target.closest("a[href]")));
+    }, { passive: true });
+  });
 })();

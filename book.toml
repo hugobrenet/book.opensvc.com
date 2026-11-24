@@ -8,8 +8,8 @@ default-theme = "navy"
 preferred-dark-theme = "navy"
 smart-punctuation = true
 mathjax-support = false
-additional-css = ["theme/custom.css"]
-additional-js = ["theme/custom.js", "theme/search.js"]
+additional-css = ["theme/custom.css", "theme/content.css"]
+additional-js = ["theme/custom.js", "theme/search.js", "theme/content.js"]
 #additional-js = ["custom.js"]
 # The sidebar names the chapters without their numbers.
 no-section-label = true
