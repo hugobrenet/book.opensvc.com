@@ -81,8 +81,11 @@ kw:
 summary:
 	cat src/preamble/SUMMARY.md.in src/agent/SUMMARY.md.in src/ai/SUMMARY.md.in src/howtos/SUMMARY.md.in src/appendix/SUMMARY.md.in src/agent.reference.keywords/SUMMARY.md.in > src/SUMMARY.md
 
+# build lays the book, then the index of its search, theme/search.js, which
+# the pages mdbook renders are read for: see tools/searchindex.py.
 build:
 	mdbook build
+	tools/searchindex.py --summary src/SUMMARY.md --src src --html book --out book/searchindex.json
 
 # llms publishes the book for the language models, after build: each page as
 # markdown next to its html page, the index llms.txt and the whole
@@ -100,6 +103,28 @@ llms:
 		--build "$$(git rev-parse --short HEAD)$$(git diff --quiet || echo -dirty) $$(date -u +%F)" \
 		--keywords-index $(KWDIR)/index.json
 
-# test runs the tests of tools/llmstxt.py, on a book of a few pages.
+# serve shows the book in a browser, built again at every change of its
+# source, with its search: mdbook empties the build when it builds it again,
+# and the index of the search is written again after it.
+serve: summary
+	set -e
+	mdbook build
+	tools/searchindex.py --summary src/SUMMARY.md --src src --html book --out book/searchindex.json
+	while sleep 1; do
+		if [ book/index.html -nt book/searchindex.json ]; then
+			tools/searchindex.py --summary src/SUMMARY.md --src src --html book --out book/searchindex.json >/dev/null 2>&1 || true
+		fi
+	done &
+	trap "kill $$! 2>/dev/null" EXIT
+	mdbook serve --open
+
+# test runs the tests of tools/llmstxt.py and tools/searchindex.py, on a book
+# of a few pages, and those of the search engine, theme/search.js, with node.
 test:
-	python3 -B -m unittest tools/llmstxt_test.py
+	python3 -B -m unittest tools/llmstxt_test.py tools/searchindex_test.py
+	node --test tools/search_test.js
+
+# search-test runs the searches the search must answer well, on the index of
+# the book built: see tools/search_queries.json.
+search-test:
+	node tools/search_queries.js book/searchindex.json

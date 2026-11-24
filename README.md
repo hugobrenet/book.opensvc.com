@@ -1,10 +1,14 @@
 This documentation is built with
 
-	mdbook build
+	make summary build
 
 Or tested in a local browser, with live updates with
 
-	mdbook serve --open
+	make serve
+
+The search of the book reads an index written after mdbook builds it, by
+`tools/searchindex.py`: a book built with `mdbook build` or served with
+`mdbook serve` alone has no search.
 
 The mdbook binary can be downloaded from https://github.com/rust-lang/mdBook/releases
 

@@ -9,7 +9,7 @@ preferred-dark-theme = "navy"
 smart-punctuation = true
 mathjax-support = false
 additional-css = ["theme/custom.css"]
-additional-js = ["theme/custom.js"]
+additional-js = ["theme/custom.js", "theme/search.js"]
 #additional-js = ["custom.js"]
 # The sidebar names the chapters without their numbers.
 no-section-label = true
@@ -23,17 +23,12 @@ site-url = "/"
 cname = "docs.opensvc.com"
 input-404 = "not-found.md"
 
+# The search is theme/search.js, on the index tools/searchindex.py writes
+# after the build: mdbook indexes the keyword reference, most of the book,
+# once per driver a keyword applies to, and a search for a keyword lists it
+# forty times.
 [output.html.search]
-enable = true            # enables the search feature
-limit-results = 10       # maximum number of search results
-teaser-word-count = 30   # number of words used for a search result teaser
-use-boolean-and = true   # multiple search terms must all match
-boost-title = 2          # ranking boost factor for matches in headers
-boost-hierarchy = 1      # ranking boost factor for matches in page names
-boost-paragraph = 1      # ranking boost factor for matches in text
-expand = true            # partial words will match longer terms
-heading-split-level = 3  # link results to heading levels
-copy-js = true           # include Javascript code for search
+enable = false
 
 [output.html.fold]
 enable = true
