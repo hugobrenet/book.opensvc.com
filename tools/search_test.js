@@ -259,3 +259,54 @@ test("nothing searched finds nothing", () => {
   assert.deepEqual(result.docs, []);
   assert.deepEqual(result.keywords, []);
 });
+
+// page is a rendered page, as section() reads it: the children of its
+// <main>, each [tag, id], and the elements inside them, each [tag, id,
+// [children]].
+function page(children) {
+  const main = { nodeName: "MAIN", childNodes: [] };
+  const byId = {};
+  function node(spec, parent) {
+    const [tag, ident, inner] = spec;
+    const n = { nodeName: tag.toUpperCase(), id: ident, parentNode: parent, childNodes: [] };
+    if (ident) {
+      byId[ident] = n;
+    }
+    (inner || []).forEach((child) => n.childNodes.push(node(child, n)));
+    return n;
+  }
+  children.forEach((spec) => main.childNodes.push(node(spec, main)));
+  main.childNodes.forEach((n, i) => { n.nextSibling = main.childNodes[i + 1] || null; });
+  main.contains = (n) => { for (let p = n; p; p = p.parentNode) { if (p === main) return true; } return false; };
+  return { querySelector: (sel) => (sel === "main" ? main : null), getElementById: (ident) => byId[ident] || null };
+}
+
+function ids(nodes) {
+  return nodes.map((n) => n.id || n.nodeName.toLowerCase());
+}
+
+const PAGE = page([
+  ["h1", "quorum"], ["p"], ["h2", "behavior"], ["p"], ["h3", "example"], ["p"],
+  ["h2", "enforce"], ["div", "", [["span", "inner"]]], ["h3", "last"], ["p"],
+]);
+
+test("the preview of a heading runs to the next heading of its level or above", () => {
+  assert.deepEqual(ids(search.section(PAGE, "behavior", false)), ["behavior", "p", "example", "p"]);
+  assert.deepEqual(ids(search.section(PAGE, "example", false)), ["example", "p"]);
+  assert.deepEqual(ids(search.section(PAGE, "last", false)), ["last", "p"]);
+});
+
+test("the preview of a page, or of an anchor it does not have, is the whole page", () => {
+  assert.equal(search.section(PAGE, "", false).length, 10);
+  assert.equal(search.section(PAGE, "missing", false).length, 10);
+});
+
+test("the preview of an anchor inside a block is the block, to the next heading", () => {
+  assert.deepEqual(ids(search.section(PAGE, "inner", false)), ["div"]);
+});
+
+test("the preview of a driver of the reference stops at its first keyword", () => {
+  const driver = page([["h1", "driver-fsext4"], ["p"], ["ul"], ["h2", "keyword-mnt"], ["p"], ["h2", "keyword-restart"], ["p"]]);
+  assert.deepEqual(ids(search.section(driver, "driver-fsext4", true)), ["driver-fsext4", "p", "ul"]);
+  assert.deepEqual(ids(search.section(driver, "keyword-mnt", true)), ["keyword-mnt", "p"]);
+});

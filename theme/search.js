@@ -20,6 +20,21 @@
 // spelled within one or two letters, "quorm" finding "quorum": the results
 // then say which word they are for.
 //
+// The result selected can be previewed, next to the results: Space, once
+// the reader moves through the results with the arrows, shows the section
+// of the result, from the page it is on, the words found marked; the
+// preview follows the selection, and Space again, or Esc, hides it. While
+// the reader types, Space is a space.
+//
+// The search is remembered from a page to the next, in the tab: opened
+// again, it shows what was searched, the result that was opened selected,
+// the text selected for what is typed to replace it.
+//
+// The panel can be made larger, to the whole screen or by its corner, and
+// its text smaller or larger, to see more or read better: the bar has the
+// buttons, Ctrl or Cmd with - = 0 zoom while the search is open, and the
+// choices are remembered.
+//
 // The engine is exported to node, for tools/search_test.js; in a browser the
 // script sets up the search of the page.
 (function () {
@@ -676,9 +691,38 @@
     return out.length > 1 || out[0] && out[0].label !== entry.where[0].driver ? out : [];
   }
 
+  // section is the content of the page doc the result links: from its
+  // heading to the next heading of its level or above, a heading of the
+  // keyword reference to the next keyword, the whole page for a page.
+  function section(doc, anchor, reference) {
+    var main = doc.querySelector("main");
+    if (!main) {
+      return [];
+    }
+    var start = anchor ? doc.getElementById(anchor) : null;
+    if (!start || !main.contains(start)) {
+      return Array.prototype.slice.call(main.childNodes);
+    }
+    while (start.parentNode !== main) {
+      start = start.parentNode;
+    }
+    var match = /^H([1-6])$/.exec(start.nodeName);
+    var level = match ? Number(match[1]) : 6;
+    var limit = reference ? Math.max(level, 2) : level;
+    var nodes = [start];
+    for (var node = start.nextSibling; node; node = node.nextSibling) {
+      var m = /^H([1-6])$/.exec(node.nodeName);
+      if (m && Number(m[1]) <= limit) {
+        break;
+      }
+      nodes.push(node);
+    }
+    return nodes;
+  }
+
   var api = {
     Engine: Engine, fold: fold, terms: terms, words: words, stem: stem, distance: distance,
-    snippet: snippet, marker: marker, chips: chips, kinds: kinds, INDEX_VERSION: INDEX_VERSION,
+    snippet: snippet, marker: marker, chips: chips, kinds: kinds, section: section, INDEX_VERSION: INDEX_VERSION,
   };
 
   if (typeof module === "object" && module.exports) {
@@ -690,6 +734,8 @@
   var DOC = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 1.5h5.5l3 3v10H4z M9.5 1.5v3h3 M6 8h4.5 M6 10.5h4.5"/></svg>';
   var KEY = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="5.5" cy="10.5" r="3"/><path d="M7.6 8.4L14 2 M11.5 4.5l1.5 1.5 M10 6l1.5 1.5"/></svg>';
   var DRIVER = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4.5l6-3 6 3-6 3z M2 8l6 3 6-3 M2 11.5l6 3 6-3"/></svg>';
+  var EYE = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></svg>';
+  var PEEK = '<button type="button" class="bs-peek" tabindex="-1" title="Preview (Space)" aria-label="Preview">' + EYE + "</button>";
   var GLASS = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5"/><path d="M10.2 10.2l4.3 4.3"/></svg>';
   var SHOWN = 5;
   var CHIPS = 6;
@@ -706,6 +752,171 @@
   var expanded = {};
   var timer = null;
   var lastFocus = null;
+  // The preview: shown or not, the reader moving through the results with
+  // the arrows, which makes Space the key of the preview, the stems found by
+  // the search, to mark, and the pages read, by their URL.
+  var preview;
+  var previewing = false;
+  var navigating = false;
+  var previewTimer = null;
+  var previewSerial = 0;
+  var foundNow = null;
+  var pages = new Map();
+  // drawn is the link of the result the preview shows.
+  var drawn = null;
+  // VIEW is where the size and the zoom of the panel are kept, and ZOOMS
+  // the steps of the zoom.
+  var VIEW = "opensvc.search.view";
+  // MOD is the key the zoom is pressed with, as the keyboard names it.
+  var MOD = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || "") ? "⌘" : "Ctrl";
+  var ZOOMS = [0.7, 0.8, 0.9, 1, 1.1, 1.25, 1.4, 1.5];
+  var view = { zoom: 1, max: false, w: 0, h: 0 };
+  var zoomLabel;
+  var maxButton;
+  var MAXIMIZE = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 2.5h4v4M6.5 13.5h-4v-4M13.5 2.5 9 7M2.5 13.5 7 9"/></svg>';
+  var RESTORE = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.5 6.5h-4v-4M2.5 9.5h4v4M9.5 6.5 14 2M6.5 9.5 2 14"/></svg>';
+
+  function loadView() {
+    try {
+      var saved = JSON.parse(window.localStorage.getItem(VIEW));
+      if (saved && typeof saved === "object") {
+        view.zoom = ZOOMS.indexOf(saved.zoom) >= 0 ? saved.zoom : 1;
+        view.max = saved.max === true;
+        view.w = Number(saved.w) || 0;
+        view.h = Number(saved.h) || 0;
+      }
+    } catch (e) {
+      /* the panel opens at its size */
+    }
+  }
+
+  function saveView() {
+    try {
+      window.localStorage.setItem(VIEW, JSON.stringify(view));
+    } catch (e) {
+      /* a reader who blocks storage sizes it again */
+    }
+  }
+
+  // applyView sizes the panel as the reader chose: the whole screen, the size
+  // they dragged it to, within the screen, or its own; and zooms its text.
+  function applyView() {
+    dialog.style.setProperty("--bs-zoom", String(view.zoom));
+    var percent = Math.round(view.zoom * 100) + "%";
+    zoomLabel.textContent = percent;
+    zoomLabel.title = "Text at " + percent + ": back to 100% (" + MOD + " 0)";
+    zoomLabel.setAttribute("aria-label", zoomLabel.title);
+    // A small screen has the panel on the whole of it already.
+    var small = window.innerWidth <= 600;
+    dialog.classList.toggle("bs-max", view.max && !small);
+    maxButton.innerHTML = view.max ? RESTORE : MAXIMIZE;
+    maxButton.setAttribute("aria-pressed", String(view.max));
+    maxButton.title = view.max ? "Restore the size" : "Enlarge to the screen";
+    if (!small && !view.max && view.w && view.h) {
+      dialog.style.width = Math.min(view.w, window.innerWidth - 32) + "px";
+      dialog.style.height = Math.min(view.h, tallest()) + "px";
+      dialog.style.maxHeight = "none";
+    } else {
+      dialog.style.width = "";
+      dialog.style.height = "";
+      dialog.style.maxHeight = "";
+    }
+  }
+
+  // tallest is the height the panel has room for under its top, 10vh, the
+  // grip of its corner in sight.
+  function tallest() {
+    return Math.round(window.innerHeight * 0.9) - 16;
+  }
+
+  function zoom(step) {
+    var at = ZOOMS.indexOf(view.zoom);
+    view.zoom = step === 0 ? 1 : ZOOMS[Math.max(0, Math.min(ZOOMS.length - 1, at + step))];
+    applyView();
+    saveView();
+  }
+
+  function tool(cls, label, html) {
+    var button = el("button", "bs-tool " + cls, html);
+    button.type = "button";
+    button.title = label;
+    button.setAttribute("aria-label", label);
+    return button;
+  }
+
+  // resizer is the grip of the bottom right corner: dragged, it sizes the
+  // panel, which stays centered, the corner under the pointer; double
+  // clicked, it gives the panel its own size back.
+  function resizer() {
+    var grip = el("div", "bs-grip", '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M11 5 5 11M11 9l-2 2"/></svg>');
+    grip.title = "Drag to resize, double-click for the default size";
+    var start = null;
+    grip.addEventListener("pointerdown", function (event) {
+      var box = dialog.getBoundingClientRect();
+      start = { x: event.clientX, y: event.clientY, w: box.width, h: box.height };
+      grip.setPointerCapture(event.pointerId);
+      event.preventDefault();
+    });
+    grip.addEventListener("pointermove", function (event) {
+      if (!start) {
+        return;
+      }
+      view.max = false;
+      view.w = Math.round(Math.max(480, Math.min(window.innerWidth - 32, start.w + 2 * (event.clientX - start.x))));
+      view.h = Math.round(Math.max(320, Math.min(tallest(), start.h + event.clientY - start.y)));
+      applyView();
+    });
+    function end() {
+      if (start) {
+        start = null;
+        saveView();
+      }
+    }
+    grip.addEventListener("pointerup", end);
+    grip.addEventListener("pointercancel", end);
+    grip.addEventListener("dblclick", function () {
+      view.w = 0;
+      view.h = 0;
+      view.max = false;
+      applyView();
+      saveView();
+    });
+    return grip;
+  }
+
+  // MEMORY is where the tab keeps the search: what was searched, the groups
+  // shown whole, and the link of the result selected, which recalled is
+  // until the search remembered is shown again.
+  var MEMORY = "opensvc.search";
+  var recalled = null;
+
+  // selected is the address of the result selected, whole: the link is
+  // written relative to the page, which the next page is not at.
+  function selected() {
+    var link = links()[active];
+    return link ? link.href : null;
+  }
+
+  function remember() {
+    try {
+      if (input.value.trim()) {
+        sessionStorage.setItem(MEMORY, JSON.stringify({ query: input.value, href: selected(), expanded: Object.keys(expanded) }));
+      } else {
+        sessionStorage.removeItem(MEMORY);
+      }
+    } catch (e) {
+      /* a tab that keeps nothing searches afresh */
+    }
+  }
+
+  function recall() {
+    try {
+      var state = JSON.parse(sessionStorage.getItem(MEMORY));
+      return state && typeof state.query === "string" ? state : null;
+    } catch (e) {
+      return null;
+    }
+  }
 
   function load() {
     if (!loading) {
@@ -757,6 +968,30 @@
     input.setAttribute("aria-expanded", "true");
     input.setAttribute("aria-autocomplete", "list");
     bar.appendChild(input);
+    var tools = el("div", "bs-tools");
+    var smaller = tool("bs-zoom-out", "Smaller text (" + MOD + " -)", "−");
+    zoomLabel = tool("bs-zoom-reset", "Text at 100%", "100%");
+    var larger = tool("bs-zoom-in", "Larger text (" + MOD + " =)", "+");
+    maxButton = tool("bs-max-toggle", "Enlarge to the screen", MAXIMIZE);
+    smaller.addEventListener("click", function () {
+      zoom(-1);
+    });
+    larger.addEventListener("click", function () {
+      zoom(1);
+    });
+    zoomLabel.addEventListener("click", function () {
+      zoom(0);
+    });
+    maxButton.addEventListener("click", function () {
+      view.max = !view.max;
+      applyView();
+      saveView();
+    });
+    tools.appendChild(smaller);
+    tools.appendChild(zoomLabel);
+    tools.appendChild(larger);
+    tools.appendChild(maxButton);
+    bar.appendChild(tools);
     var esc = el("button", "bs-esc", "Esc");
     esc.type = "button";
     esc.setAttribute("aria-label", "Close the search");
@@ -765,24 +1000,59 @@
     body.id = "bs-results";
     body.setAttribute("role", "listbox");
     var foot = el("div", "bs-foot");
-    foot.innerHTML = '<span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>↵</kbd> to open</span><span><kbd>Esc</kbd> to close</span>';
+    foot.innerHTML = '<span><kbd>↑</kbd><kbd>↓</kbd> to move</span><span><kbd>␣</kbd> <span class="bs-preview-key">to preview</span></span>' +
+      '<span><kbd>↵</kbd> to open</span><span><kbd>Esc</kbd> to close</span>';
     count = el("span", "bs-count");
     foot.appendChild(count);
+    preview = el("aside", "bs-preview");
+    preview.setAttribute("aria-label", "Preview of the result");
+    var main = el("div", "bs-main");
+    main.appendChild(body);
+    main.appendChild(preview);
     dialog.appendChild(bar);
-    dialog.appendChild(body);
+    dialog.appendChild(main);
     dialog.appendChild(foot);
+    dialog.appendChild(resizer());
     document.body.appendChild(backdrop);
     document.body.appendChild(dialog);
+    loadView();
+    applyView();
+    window.addEventListener("resize", function () {
+      if (document.documentElement.classList.contains("search-open")) {
+        applyView();
+      }
+    });
 
     backdrop.addEventListener("click", close);
     esc.addEventListener("click", close);
     input.addEventListener("input", function () {
       clearTimeout(timer);
       expanded = {};
+      navigating = false;
       timer = setTimeout(run, 40);
+    });
+    preview.addEventListener("click", function (event) {
+      if (event.target.closest(".bs-preview-close")) {
+        showPreview(false);
+        input.focus();
+      } else if (event.target.closest("a[href]")) {
+        close();
+      }
     });
     dialog.addEventListener("keydown", keys);
     body.addEventListener("click", function (event) {
+      var peek = event.target.closest(".bs-peek");
+      if (peek) {
+        var at = links().indexOf(peek.parentNode.querySelector(".bs-link"));
+        if (previewing && at === active) {
+          showPreview(false);
+        } else {
+          select(at, false);
+          showPreview(true);
+        }
+        input.focus();
+        return;
+      }
       var more = event.target.closest(".bs-more");
       if (more) {
         expanded[more.dataset.group] = true;
@@ -818,6 +1088,9 @@
     if (!all.length) {
       active = -1;
       input.removeAttribute("aria-activedescendant");
+      if (previewing) {
+        schedule();
+      }
       return;
     }
     i = Math.max(0, Math.min(all.length - 1, i));
@@ -830,6 +1103,29 @@
     if (scroll) {
       all[i].scrollIntoView({ block: "nearest" });
     }
+    // The preview follows the selection, not the pointer resting on it.
+    if (previewing && all[i].href !== drawn) {
+      schedule();
+    }
+  }
+
+  // zoomStep is the step of the zoom a key asks for, or null: Ctrl or Cmd
+  // with -, = or + and 0, by the character or by the key, for 0 is à on a
+  // French keyboard and - the key of 6.
+  function zoomStep(event) {
+    if (!(event.ctrlKey || event.metaKey) || event.altKey) {
+      return null;
+    }
+    if (event.key === "-" || event.code === "Minus" || event.code === "NumpadSubtract") {
+      return -1;
+    }
+    if (event.key === "=" || event.key === "+" || event.code === "Equal" || event.code === "NumpadAdd") {
+      return 1;
+    }
+    if (event.key === "0" || event.code === "Digit0" || event.code === "Numpad0") {
+      return 0;
+    }
+    return null;
   }
 
   // keys are the keys of the search, wherever its focus is: the keys of the
@@ -837,9 +1133,36 @@
   // the search is in front of it, and the focus stays in the search.
   function keys(event) {
     event.stopPropagation();
-    if (event.key === "Escape") {
+    var step = zoomStep(event);
+    if (step !== null) {
+      // The zoom of the panel, not of the page behind it.
       event.preventDefault();
-      close();
+      zoom(step);
+    } else if (event.key === "Escape") {
+      event.preventDefault();
+      if (previewing) {
+        showPreview(false);
+      } else {
+        close();
+      }
+    } else if (event.key === " " && !event.ctrlKey && !event.altKey && !event.metaKey &&
+      (event.target === input ? navigating : event.target.classList.contains("bs-link"))) {
+      event.preventDefault();
+      var focused = links().indexOf(event.target);
+      if (focused >= 0 && focused !== active) {
+        // The result the keys reached, not the one selected before.
+        select(focused, false);
+        showPreview(true);
+      } else {
+        showPreview(!previewing);
+      }
+    } else if ((event.key === "PageDown" || event.key === "PageUp") && previewing) {
+      // The preview is read with the keys too, the focus in the field.
+      var reading = preview.querySelector(".bs-preview-body");
+      if (reading) {
+        event.preventDefault();
+        reading.scrollBy({ top: (event.key === "PageDown" ? 1 : -1) * reading.clientHeight * 0.85 });
+      }
     } else if (event.key === "Tab") {
       var all = Array.prototype.filter.call(dialog.querySelectorAll("input, button, a[href]"), function (node) {
         return node.offsetParent !== null;
@@ -858,6 +1181,7 @@
       if (document.activeElement !== input) {
         input.focus();
       }
+      navigating = true;
       select(active + (event.key === "ArrowDown" ? 1 : -1), true);
     } else if (event.key === "Enter" && event.target === input) {
       var link = links()[active];
@@ -878,9 +1202,24 @@
       build();
     }
     lastFocus = document.activeElement;
+    navigating = false;
     document.documentElement.classList.add("search-open");
+    // The screen may have changed size while the search was closed.
+    applyView();
     if (typeof query === "string") {
       input.value = query;
+    } else if (!input.value) {
+      var state = recall();
+      if (state) {
+        input.value = state.query;
+        recalled = typeof state.href === "string" ? state.href : null;
+        expanded = {};
+        (Array.isArray(state.expanded) ? state.expanded : []).forEach(function (name) {
+          expanded[name] = true;
+        });
+      }
+    } else {
+      recalled = selected();
     }
     input.focus();
     input.select();
@@ -892,6 +1231,8 @@
       return;
     }
     document.documentElement.classList.remove("search-open");
+    remember();
+    showPreview(false);
     if (lastFocus && lastFocus.focus) {
       lastFocus.focus();
     }
@@ -905,6 +1246,9 @@
       body.innerHTML = '<p class="bs-hint">Search pages, sections, keywords and drivers: <em>quorum</em>, <em>restart</em>, <em>hb.relay</em>, <em>monitor_action</em>.</p>';
       count.textContent = "";
       active = -1;
+      if (previewing) {
+        schedule();
+      }
       return;
     }
     if (!engine) {
@@ -939,7 +1283,7 @@
       '<span class="bs-text"><span class="bs-title">' + escape(title) + "</span>" +
       (path ? '<span class="bs-path">' + escape(path) + "</span>" : "") +
       (text ? '<span class="bs-snippet">' + snippet(text, found) + "</span>" : "") +
-      "</span></a>";
+      "</span></a>" + PEEK;
     var named = {};
     named[best.heading] = true;
     var also = hit.hits.slice(1).filter(function (h) {
@@ -967,7 +1311,7 @@
       '<span class="bs-text"><span class="bs-title"><code>' + escape(entry.name) + "</code>" +
       '<span class="bs-kinds">' + escape(label + " · " + kinds(entry.where).join(" · ")) + "</span></span>" +
       (entry.short ? '<span class="bs-snippet">' + snippet(entry.short, found, 140) + "</span>" : "") +
-      "</span></a>";
+      "</span></a>" + PEEK;
     var list = chips(entry);
     if (list.length) {
       html += '<div class="bs-chips">' + list.map(function (c, i) {
@@ -989,6 +1333,7 @@
     var scroll = body.scrollTop;
     var was = active;
     var found = marker(result.terms);
+    foundNow = found;
     var html = "";
     if (result.corrections.length) {
       var fixed = query;
@@ -1015,7 +1360,194 @@
     var n = result.docs.length + result.keywords.length;
     count.textContent = n ? n + (n > 1 ? " results" : " result") : "";
     active = -1;
-    select(keep ? was : 0, false);
+    var at = recalled === null ? -1 : links().map(function (link) {
+      return link.href;
+    }).indexOf(recalled);
+    select(keep ? was : Math.max(at, 0), at >= 0);
+    recalled = null;
+  }
+
+  // showPreview shows the preview of the result selected, or hides it.
+  function showPreview(on) {
+    if (!dialog) {
+      return;
+    }
+    previewing = on;
+    dialog.classList.toggle("bs-previewing", on);
+    dialog.querySelector(".bs-preview-key").textContent = on ? "to hide the preview" : "to preview";
+    clearTimeout(previewTimer);
+    previewSerial++;
+    drawn = null;
+    if (on) {
+      draw();
+      var link = links()[active];
+      if (link) {
+        link.scrollIntoView({ block: "nearest" });
+      }
+    } else {
+      preview.textContent = "";
+    }
+  }
+
+  // schedule draws the preview once the selection rests: the arrows held
+  // down do not load every page they pass.
+  function schedule() {
+    clearTimeout(previewTimer);
+    previewTimer = setTimeout(draw, 80);
+  }
+
+  // page is the document of the page at url, read once.
+  function page(url) {
+    if (!pages.has(url)) {
+      var read = fetch(url).then(function (r) {
+        if (!r.ok) {
+          throw new Error(url + ": " + r.status);
+        }
+        return r.text();
+      }).then(function (text) {
+        return new DOMParser().parseFromString(text, "text/html");
+      });
+      read.catch(function () {
+        pages.delete(url);
+      });
+      pages.set(url, read);
+    }
+    return pages.get(url);
+  }
+
+  // mark marks, in the text under root, the words the search found.
+  function mark(root, found) {
+    if (!found) {
+      return;
+    }
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    var texts = [];
+    while (walker.nextNode()) {
+      texts.push(walker.currentNode);
+    }
+    texts.forEach(function (text) {
+      if (text.parentNode.closest("mark, script, style")) {
+        return;
+      }
+      var value = text.nodeValue;
+      var re = new RegExp(TOKEN.source, "g");
+      var m;
+      var last = 0;
+      var parts = [];
+      while ((m = re.exec(value))) {
+        if (marks(m[0], found)) {
+          parts.push(document.createTextNode(value.slice(last, m.index)));
+          var tag = document.createElement("mark");
+          tag.textContent = m[0];
+          parts.push(tag);
+          last = m.index + m[0].length;
+        }
+      }
+      if (!parts.length) {
+        return;
+      }
+      parts.push(document.createTextNode(value.slice(last)));
+      parts.forEach(function (part) {
+        text.parentNode.insertBefore(part, text);
+      });
+      text.remove();
+    });
+  }
+
+  // draw draws the preview of the result selected: its title and the path
+  // of its page, as the result names them, then its section.
+  function draw() {
+    if (!previewing) {
+      return;
+    }
+    var serialNow = ++previewSerial;
+    var link = links()[active];
+    drawn = link ? link.href : null;
+    preview.textContent = "";
+    if (!link) {
+      preview.appendChild(el("p", "bs-hint", "No result to preview."));
+      return;
+    }
+    var head = el("div", "bs-preview-head");
+    var names = el("div", "bs-preview-names");
+    var title = el("div", "bs-preview-title");
+    title.textContent = link.querySelector(".bs-title").firstChild.textContent;
+    names.appendChild(title);
+    var where = link.querySelector(".bs-path, .bs-kinds");
+    if (where) {
+      var path = el("div", "bs-path");
+      path.textContent = where.textContent;
+      names.appendChild(path);
+    }
+    head.appendChild(names);
+    var go = el("a", "bs-preview-open", "Open <kbd>↵</kbd>");
+    go.href = link.href;
+    head.appendChild(go);
+    var shut = el("button", "bs-preview-close", "×");
+    shut.type = "button";
+    shut.setAttribute("aria-label", "Hide the preview");
+    head.appendChild(shut);
+    var content = el("div", "bs-preview-body content");
+    content.appendChild(el("p", "bs-hint", "Loading…"));
+    preview.appendChild(head);
+    preview.appendChild(content);
+
+    var url = link.href.split("#")[0];
+    var anchor = decodeURIComponent(link.hash.slice(1));
+    var reference = url.indexOf("/" + KEYWORDS) >= 0;
+    page(url).then(function (doc) {
+      if (serialNow !== previewSerial) {
+        return;
+      }
+      var main = el("main");
+      section(doc, anchor, reference).forEach(function (node) {
+        main.appendChild(document.importNode(node, true));
+      });
+      main.querySelectorAll("script").forEach(function (node) {
+        node.remove();
+      });
+      // The links of the section are relative to its page.
+      main.querySelectorAll("[href], [src]").forEach(function (node) {
+        ["href", "src"].forEach(function (name) {
+          var value = node.getAttribute(name);
+          if (value !== null) {
+            node.setAttribute(name, new URL(value, url).href);
+          }
+        });
+      });
+      // The code colored as mdbook colors that of the page.
+      if (window.hljs) {
+        main.querySelectorAll("code").forEach(function (code) {
+          if (!code.parentElement.classList.contains("header")) {
+            window.hljs.highlightBlock(code);
+            code.classList.add("hljs");
+          }
+        });
+      }
+      // The notes, labels and keyword tags drawn as on the page,
+      // theme/content.js.
+      if (window.bookContent) {
+        window.bookContent.enhance(main, url);
+      }
+      mark(main, foundNow);
+      content.textContent = "";
+      content.appendChild(main);
+      content.scrollTop = 0;
+      // The first word found in sight, when the section is longer than the
+      // preview.
+      var first = main.querySelector("mark");
+      if (first) {
+        var below = first.getBoundingClientRect().top - content.getBoundingClientRect().top;
+        if (below > content.clientHeight * 0.6) {
+          content.scrollTop = below - content.clientHeight / 3;
+        }
+      }
+    }, function () {
+      if (serialNow === previewSerial) {
+        content.textContent = "";
+        content.appendChild(el("p", "bs-hint", "The page could not be loaded."));
+      }
+    });
   }
 
   // The buttons that open the search: the field of the sidebar head, which
