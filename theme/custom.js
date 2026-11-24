@@ -348,20 +348,11 @@
   search.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/>' +
     '<line x1="10.2" y1="10.2" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>' +
     "<span>Search…</span><kbd>S</kbd>";
+  // The search is theme/search.js.
   search.addEventListener("click", function () {
-    var toggle = document.getElementById("mdbook-search-toggle") || document.getElementById("search-toggle");
-    var wrapper = document.getElementById("mdbook-search-wrapper") || document.getElementById("search-wrapper");
-    var field = document.getElementById("mdbook-searchbar") || document.getElementById("searchbar");
-    if (!toggle) {
-      return;
+    if (window.bookSearch) {
+      window.bookSearch.open();
     }
-    if (wrapper && !wrapper.classList.contains("hidden")) {
-      if (field) {
-        field.focus();
-      }
-      return;
-    }
-    toggle.click();
   });
 
   head.appendChild(top);
@@ -645,128 +636,4 @@
   }
   show();
   wide.addEventListener("change", show);
-})();
-
-// Search in front of the page.
-//
-// The search opens over the page read, which is grayed out behind it, rather
-// than at its top: mdbook shows its search wrapper above the content and
-// scrolls the page up to it. The wrapper moves to the end of the body, a
-// backdrop covers the page while it shows, a click on the backdrop closes it
-// as the search button does, and the page stays where the reader was.
-(function () {
-  function init() {
-    var wrapper = document.getElementById("mdbook-search-wrapper") || document.getElementById("search-wrapper");
-    var toggle = document.getElementById("mdbook-search-toggle") || document.getElementById("search-toggle");
-    if (!wrapper || !toggle) {
-      return;
-    }
-    var backdrop = document.createElement("div");
-    backdrop.className = "search-backdrop";
-    document.body.appendChild(backdrop);
-    document.body.appendChild(wrapper);
-    backdrop.addEventListener("click", function () {
-      if (!wrapper.classList.contains("hidden")) {
-        toggle.click();
-      }
-    });
-    // Where the reader was before the search opened: mdbook scrolls to the
-    // top when it opens the search.
-    var y = window.scrollY;
-    window.addEventListener("scroll", function () {
-      if (wrapper.classList.contains("hidden")) {
-        y = window.scrollY;
-      }
-    }, { passive: true });
-    function sync() {
-      var open = !wrapper.classList.contains("hidden");
-      document.documentElement.classList.toggle("search-open", open);
-      if (open) {
-        window.scrollTo(0, y);
-      }
-    }
-    new MutationObserver(sync).observe(wrapper, { attributes: true, attributeFilter: ["class"] });
-    sync();
-  }
-
-  if (document.readyState === "loading") {
-    window.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
-})();
-
-// Search results.
-//
-// Each result shows an icon of its kind, a page of the documentation or a
-// keyword of the reference, the heading found in bold, and under it where
-// the heading is, the path of its page in the book, such as Configure >
-// Cluster Quorum. mdbook writes a result as a link of its breadcrumbs,
-// "Configure » Cluster Quorum » Enabling Quorum Enforcement", and a teaser:
-// the link is rewritten here, the teaser hidden.
-(function () {
-  var DOC = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 1.5h5.5l3 3v10H4z M9.5 1.5v3h3 M6 8h4.5 M6 10.5h4.5"/></svg>';
-  var KEY = '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="5.5" cy="10.5" r="3"/><path d="M7.6 8.4L14 2 M11.5 4.5l1.5 1.5 M10 6l1.5 1.5"/></svg>';
-
-  function format(item) {
-    var link = item.querySelector("a");
-    if (!link || item.dataset.formatted) {
-      return;
-    }
-    item.dataset.formatted = "1";
-    // mdbook asks the page opened to highlight the words searched, which
-    // the reader cannot clear: the link opens the page as it is.
-    var href = link.getAttribute("href");
-    link.setAttribute("href", href.replace(/\?highlight=[^#]*/, ""));
-    var keyword = /agent\.reference\.keywords\//.test(href);
-    var parts = link.textContent.split(" » ").map(function (part) {
-      return part.trim();
-    });
-    var title = parts.pop();
-    // The heading of a page repeats its name in the breadcrumbs.
-    if (parts.length && parts[parts.length - 1] === title) {
-      parts.pop();
-    }
-    if (keyword) {
-      title = title.replace(/^Keyword /, "");
-      parts.unshift("Keywords");
-    }
-    var icon = document.createElement("span");
-    icon.className = "sr-icon";
-    icon.innerHTML = keyword ? KEY : DOC;
-    var text = document.createElement("span");
-    text.className = "sr-text";
-    var strong = document.createElement("span");
-    strong.className = "sr-title";
-    strong.textContent = title;
-    var path = document.createElement("span");
-    path.className = "sr-path";
-    path.textContent = parts.join(" > ");
-    text.appendChild(strong);
-    if (parts.length) {
-      text.appendChild(path);
-    }
-    link.textContent = "";
-    link.appendChild(icon);
-    link.appendChild(text);
-    link.setAttribute("aria-label", title + (parts.length ? ", " + parts.join(", ") : ""));
-  }
-
-  function init() {
-    var list = document.getElementById("mdbook-searchresults") || document.getElementById("searchresults");
-    if (!list) {
-      return;
-    }
-    function all() {
-      list.querySelectorAll(":scope > li").forEach(format);
-    }
-    new MutationObserver(all).observe(list, { childList: true });
-    all();
-  }
-
-  if (document.readyState === "loading") {
-    window.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
 })();
